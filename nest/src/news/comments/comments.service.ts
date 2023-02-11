@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CommentDto } from './dto/comment.dto';
+import { CommentDto, CommentWithReplyDto } from './dto/comment.dto';
 import { getRandomInt } from '../news.service';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 
@@ -7,42 +7,38 @@ import { UpdateCommentDto } from './dto/update-comment.dto';
 export class CommentsService {
   private readonly comments = {};
 
-  async create(idNews: number, comment: CommentDto): Promise<CommentDto> {
-    if (!this.comments[idNews]) {
-      this.comments[idNews] = [];
+  async create(
+    idNews: number,
+    comment: CommentWithReplyDto,
+    idComment?: number,
+  ) {
+    if (!idComment) {
+      if (!this.comments[idNews]) {
+        this.comments[idNews] = [];
+      }
+
+      this.comments[idNews].push({
+        ...comment,
+        id: getRandomInt(),
+      });
+      return comment;
     }
-    this.comments[idNews].push({
-      ...comment,
-      id: getRandomInt(),
-    });
-    return comment;
+    return this.findCommentAndReply(this.comments, idComment, comment);
   }
 
   findAll(idNews: number): CommentDto[] | undefined {
     return this.comments[idNews];
   }
 
-  updateComment(
+  async updateComment(
     idNews: number,
     idComment: number,
     dto: UpdateCommentDto,
-  ): CommentDto[] {
+  ): Promise<CommentWithReplyDto[]> {
     if (!this.comments[idNews]) {
       return null;
     }
-
-    const commentEditIndex = this.comments[idNews].findIndex(
-      (el) => el.id === idComment,
-    );
-
-    if (commentEditIndex !== -1) {
-      this.comments[idNews][commentEditIndex] = {
-        ...this.comments[idNews][commentEditIndex],
-        ...dto,
-      };
-
-      return this.comments[idNews];
-    }
+    return this.findAndEdit(this.comments, idComment, dto);
   }
 
   async remove(idNews: number, idComment: number): Promise<boolean> {
@@ -63,4 +59,78 @@ export class CommentsService {
   async removeAll(idNews: number): Promise<boolean> {
     return delete this.comments?.[idNews];
   }
+
+  private findCommentAndReply(comments, idComment, comment) {
+    for (const property in comments) {
+      if (comments.hasOwnProperty(property)) {
+        if (typeof comments[property] === 'object') {
+          this.findCommentAndReply(comments[property], idComment, comment);
+        }
+        if (comments[property] == idComment) {
+          if (!comments['reply']) {
+            comments['reply'] = [];
+          }
+          comments['reply'].push({
+            ...comment,
+            id: getRandomInt(),
+          });
+          return comment;
+        }
+      }
+    }
+  }
+
+  private findAndEdit(comments, idComment, comment) {
+    for (const property in comments) {
+      if (comments.hasOwnProperty(property)) {
+        if (typeof comments[property] === 'object') {
+          this.findAndEdit(comments[property], idComment, comment);
+        }
+        if (comments[property] == idComment) {
+          comments = {
+            ...comments,
+            ...comment,
+          };
+          console.log(comments);
+          return comments;
+        }
+      }
+    }
+  }
 }
+
+/*
+async create(
+  idNews: number,
+  comment: CommentWithReplyDto,
+  idComment?: string,
+): Promise<CommentWithReplyDto> {
+  if (!this.comments[idNews]) {
+  this.comments[idNews] = [];
+}
+
+const parentCommentIndex = this.comments[idNews].findIndex(
+  (el) => el.id === comment.id,
+);
+
+if (parentCommentIndex !== -1) {
+  this.comments[idNews][parentCommentIndex] = {
+    ...this.comments[idNews][parentCommentIndex],
+    reply: [
+      ...this.comments[idNews][parentCommentIndex].reply,
+      {
+        ...comment,
+        id: getRandomInt(),
+      },
+    ],
+  };
+  return this.comments[idNews][parentCommentIndex];
+}
+
+this.comments[idNews].push({
+  ...comment,
+  id: getRandomInt(),
+  reply: [],
+});
+return comment;
+}*/

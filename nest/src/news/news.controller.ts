@@ -15,6 +15,7 @@ import { UpdateNewsDto } from './dto/update-news.dto';
 import { CommentsService } from './comments/comments.service';
 import { renderNewsAll } from '../views/news/news-all';
 import { htmlTemplate } from '../views/template';
+import { renderNewsOne } from '../views/news/news-one';
 
 @Controller()
 export class NewsController {
@@ -29,12 +30,24 @@ export class NewsController {
   }
 
   @Get('view/news/')
-  async getAllView() {
+  async getAllView(): Promise<string> {
     const news = await this.newService.getAll();
     const content = renderNewsAll(news);
     return htmlTemplate(content, {
       title: 'Список новостей',
       description: 'Самые крутые новости на свете ',
+    });
+  }
+
+  @Get('view/news/:idNews/detail')
+  async getOneNewsView(@Param('idNews') idNews: string): Promise<string> {
+    const intId = +idNews;
+    const news = await this.newService.find(intId);
+    const comments = this.commentService.findAll(intId);
+    const content = renderNewsOne(news, comments);
+    return htmlTemplate(content, {
+      title: 'Новость',
+      description: `Самая лучшая новость`,
     });
   }
 

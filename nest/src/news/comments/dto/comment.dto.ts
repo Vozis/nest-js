@@ -3,3 +3,7 @@ export class CommentDto {
   author: string;
   id?: number;
 }
+
+export class CommentWithReplyDto extends CommentDto {
+  reply?: CommentDto[];
+}
