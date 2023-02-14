@@ -1,9 +1,5 @@
-export class CommentDto {
+export class CreateCommentDto {
   message: string;
   author: string;
   id?: number;
-}
-
-export class CommentWithReplyDto extends CommentDto {
-  reply?: CommentDto[];
 }

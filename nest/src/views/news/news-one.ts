@@ -1,27 +1,26 @@
 import { CreateNewsDto } from '../../news/dto/create-news.dto';
 import { newUrl } from './news-all';
-import { CommentWithReplyDto } from '../../news/comments/dto/comment.dto';
 
-export function renderNewsOne(
-  news: CreateNewsDto,
-  comments: CommentWithReplyDto[],
-): string {
+import { News } from '../../news/news.interface';
+import { CommentReply } from '../../news/comments/comment.interface';
+
+export function renderNewsOne(news: News, comments: CommentReply[]): string {
   let commentHtml = '';
   commentHtml = renderCommentsAll(news, comments);
 
   const html = `
-<div class='container'>
-<a href='${newUrl}' style='margin-bottom: 50px' class='btn btn-primary'>Вернуться назад</a>
-  <div class='card' style='width: 100%'>
+<div class="container">
+<a href="${newUrl}" style="margin-bottom: 50px" class="btn btn-primary">Вернуться назад</a>
+  <div class="card" style="width: 100%">
        ${
          news.cover
-           ? `<img class='card-img-top' STYLE='height: 200px; object-fit: cover' src='${news.cover}' alt='Card image cap'/>`
+           ? `<img class="card-img-top" STYLE="height: 200px; object-fit: cover" src="${news.cover}" alt="Card image cap"/>`
            : ''
        }
-    <div class='card-body' data-id='${news.id}'>
-      <h5 class='card-title'>${news.title}</h5>
-      <h6 class='card-subtitle mb-2 text-muted'>${news.author}</h6>
-      <p class='card-text'>${news.description}</p>
+    <div class="card-body" data-id="${news.id}">
+      <h5 class="card-title">${news.title}</h5>
+      <h6 class="card-subtitle mb-2 text-muted">${news.author}</h6>
+      <p class="card-text">${news.description}</p>
     </div>
   </div>
 ${commentHtml}
@@ -30,7 +29,7 @@ ${commentHtml}
   return html;
 }
 
-function renderCommentsAll(news, comments: CommentWithReplyDto[]) {
+function renderCommentsAll(news, comments: CommentReply[]) {
   let commentListHtml = `
   <div>
       <p>Добавить комментарий:</p>
@@ -76,7 +75,7 @@ function renderCommentsAll(news, comments: CommentWithReplyDto[]) {
   return commentListHtml;
 }
 
-function renderComment(news, comment: CommentWithReplyDto) {
+function renderComment(news, comment: CommentReply) {
   let commentReplyHtml = `
   <div class='card' style='width: 100%'>
   <div class='card-body'>
@@ -111,23 +110,23 @@ function renderComment(news, comment: CommentWithReplyDto) {
   `;
   if (!comment.reply) {
     commentReplyHtml += `
-    <p class='card-text'>Ответов нет</p>
+    <p class="card-text">Ответов нет</p>
     `;
   } else {
     for (const commentReply of comment.reply) {
       commentReplyHtml += `
-      <p class='card-text'>Автор: ${commentReply.author}</p>
-      <p class='card-text'>Сообщение: ${commentReply.message}</p>
+      <p class="card-text">Автор: ${commentReply.author}</p>
+      <p class="card-text">Сообщение: ${commentReply.message}</p>
       `;
     }
     commentReplyHtml += `</div>`;
   }
 
   return `
-  <div class='card' style='width: 100%'>
-    <div class='card-body' data-id='${comment.id}'>
-     <h6 class='card-subtitle mb-2 text-muted'>Автор: ${comment.author}</h6>
-     <p class='card-text'>Сообшение: ${comment.message}</p>
+  <div class="card" style="width: 100%">
+    <div class="card-body" data-id="${comment.id}">
+     <h6 class="card-subtitle mb-2 text-muted">Автор: ${comment.author}</h6>
+     <p class="card-text">Сообшение: ${comment.message}</p>
      ${commentReplyHtml}
     </div>
   </div>`;

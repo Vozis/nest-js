@@ -8,15 +8,15 @@ import {
   Put,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
-import { CommentDto, CommentWithReplyDto } from './dto/comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { CommentReply } from './comment.interface';
 
 @Controller()
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
   @Post('api/comments/:idNews')
-  create(@Param('idNews') idNews: string, @Body() dto: CommentWithReplyDto) {
+  create(@Param('idNews') idNews: string, @Body() dto: CommentReply) {
     const idNewsInt = +idNews;
     return this.commentsService.create(idNewsInt, dto);
   }
@@ -25,7 +25,7 @@ export class CommentsController {
   replyToComment(
     @Param('idNews') idNews: string,
     @Param('idComment') idComment: string,
-    @Body() dto: CommentWithReplyDto,
+    @Body() dto: CommentReply,
   ) {
     const idNewsInt = +idNews;
     const idCommentInt = +idComment;
@@ -33,7 +33,7 @@ export class CommentsController {
   }
 
   @Get('api/comments/:idNews')
-  findAll(@Param('idNews') idNews: string): CommentDto[] {
+  findAll(@Param('idNews') idNews: string): CommentReply[] {
     const idNewsInt = +idNews;
     return this.commentsService.findAll(idNewsInt);
   }
@@ -59,7 +59,7 @@ export class CommentsController {
     @Param('idNews') idNews: string,
     @Param('idComment') idComment: string,
     @Body() dto: UpdateCommentDto,
-  ): Promise<CommentWithReplyDto[]> {
+  ): Promise<CommentReply[]> {
     const idNewsInt = +idNews;
     const idCommentInt = +idComment;
     return this.commentsService.updateComment(idNewsInt, idCommentInt, dto);

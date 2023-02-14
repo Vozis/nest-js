@@ -1,14 +1,30 @@
-import { HttpAdapterHost, NestFactory } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './exceptions/http-exception.filter';
-import { AllExceptionsFilter } from './exceptions/all-exceptions.filter';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
+  const PORT = process.env.PORT || 3000;
   const app = await NestFactory.create(AppModule);
-  app.useGlobalFilters(new HttpExceptionFilter());
-  // const { httpAdapter } = app.get(HttpAdapterHost);
-  // app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
-  await app.listen(3000);
+  app.useGlobalPipes(
+    new ValidationPipe({
+      // whitelist: true,
+      transform: true,
+    }),
+  );
+
+  const config = new DocumentBuilder()
+    .setTitle('Урок по nest js')
+    .setDescription('курс GB')
+    .setVersion('1.0.0')
+    .addTag('nest-js')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('/api/docs', app, document);
+  await app.listen(PORT, () => {
+    console.log(`Server started on PORT = ${PORT}`);
+  });
 }
 
 bootstrap();

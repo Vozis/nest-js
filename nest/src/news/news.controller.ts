@@ -16,6 +16,8 @@ import { CommentsService } from './comments/comments.service';
 import { renderNewsAll } from '../views/news/news-all';
 import { htmlTemplate } from '../views/template';
 import { renderNewsOne } from '../views/news/news-one';
+import { News, NewsEdit } from './news.interface';
+import { IdNewsDto } from './dto/id-news.dto';
 
 @Controller()
 export class NewsController {
@@ -25,7 +27,7 @@ export class NewsController {
   ) {}
 
   @Get('api/news/all')
-  async getAll(): Promise<CreateNewsDto[]> {
+  async getAll(): Promise<News[]> {
     return this.newService.getAll();
   }
 
@@ -40,7 +42,7 @@ export class NewsController {
   }
 
   @Get('view/news/:idNews/detail')
-  async getOneNewsView(@Param('idNews') idNews: string): Promise<string> {
+  async getOneNewsView(@Param('idNews') idNews: IdNewsDto): Promise<string> {
     const intId = +idNews;
     const news = await this.newService.find(intId);
     const comments = this.commentService.findAll(intId);
@@ -52,7 +54,7 @@ export class NewsController {
   }
 
   @Get('api/news/:id')
-  async getOneNews(@Param('id') id: string): Promise<CreateNewsDto | Error> {
+  async getOneNews(@Param('id') id: IdNewsDto): Promise<News | Error> {
     const intId = +id;
     const news = await this.newService.find(intId);
     const comments = this.commentService.findAll(intId);
@@ -63,18 +65,18 @@ export class NewsController {
   }
 
   @Post('api/news/')
-  async createNews(@Body() dto: CreateNewsDto): Promise<CreateNewsDto[]> {
+  async createNews(@Body() dto: News): Promise<News[]> {
     return this.newService.createNews(dto);
   }
 
   @Put('api/news/:id')
-  async updateNews(@Param('id') id: string, @Body() dto: UpdateNewsDto) {
+  async updateNews(@Param('id') id: IdNewsDto, @Body() dto: NewsEdit) {
     const intId = +id;
     return this.newService.update(intId, dto);
   }
 
   @Delete('api/news/:id')
-  async removeNews(@Param('id') id: string): Promise<string> {
+  async removeNews(@Param('id') id: IdNewsDto): Promise<string> {
     const intId = +id;
     const isRemoved =
       (await this.newService.remove(intId)) &&

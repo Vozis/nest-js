@@ -1,17 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { CommentDto, CommentWithReplyDto } from './dto/comment.dto';
-import { getRandomInt } from '../news.service';
+
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { getRandomInt } from '../../utils/getRandom';
+import { CommentReply } from './comment.interface';
 
 @Injectable()
 export class CommentsService {
   private readonly comments = {};
 
-  async create(
-    idNews: number,
-    comment: CommentWithReplyDto,
-    idComment?: number,
-  ) {
+  async create(idNews: number, comment: CommentReply, idComment?: number) {
     if (!idComment) {
       if (!this.comments[idNews]) {
         this.comments[idNews] = [];
@@ -26,7 +23,7 @@ export class CommentsService {
     return this.findCommentAndReply(this.comments, idComment, comment);
   }
 
-  findAll(idNews: number): CommentDto[] | undefined {
+  findAll(idNews: number): CommentReply[] | undefined {
     return this.comments[idNews];
   }
 
@@ -34,7 +31,7 @@ export class CommentsService {
     idNews: number,
     idComment: number,
     dto: UpdateCommentDto,
-  ): Promise<CommentWithReplyDto[]> {
+  ): Promise<CommentReply[]> {
     if (!this.comments[idNews]) {
       return null;
     }
