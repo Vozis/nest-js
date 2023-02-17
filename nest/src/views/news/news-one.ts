@@ -36,19 +36,19 @@ function renderCommentsAll(news, comments: Comments) {
          <input type='text' name='author' id='author' placeholder='Имя' required/>
          <input type='text' name='message' id='message' placeholder='Сообщение' required/>
          <input type='file' name='avatar' id='avatar' />
-         <input class='button' type='submit'/>
+         <input class='button' type='submit' id='submit'/>
       </form>
        <script> 
        const form = document.getElementById('comment');
        form.addEventListener('submit', (event) => {
+         const formData = new FormData(form)
           const requestOptions = {
                   method: 'POST',
-                  body: new FormData(form),
-                  redirect: 'manual'
+                  body: formData,
+                  redirect: 'follow'
                 };
          let response =  fetch("http://localhost:3000/api/comments/${news.id}", requestOptions)
-         .then(response => { response.url = '"http://localhost:3000/api/comments/${news.id}"';
-          return response.text()})
+          .then(response => response.text())
                   .then(result => console.log(result))
                   .catch(error => console.log('error', error));
        })

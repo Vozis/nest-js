@@ -9,28 +9,25 @@ import {
   Post,
   Put,
   UploadedFile,
+  UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
 import { NewsService } from './news.service';
 import { CreateNewsDto } from './dto/create-news.dto';
-import { UpdateNewsDto } from './dto/update-news.dto';
 import { CommentsService } from './comments/comments.service';
 import { renderNewsAll } from '../views/news/news-all';
 import { htmlTemplate } from '../views/template';
 import { renderNewsOne } from '../views/news/news-one';
 import { AllNews, News, NewsEdit } from './news.interface';
 import { IdNewsDto } from './dto/id-news.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { HelperFileLoader } from '../utils/helperFileLoader';
-import { LoggingInterceptor } from '../interceptors/logging.interceptor';
-import { log } from 'util';
 
-const PATH_NEWS = '/static/news/';
-const helperFileLoaderNews = new HelperFileLoader();
-helperFileLoaderNews.path = PATH_NEWS;
+const PATH_NEWS = '/news-static/';
+const helperFileLoader = new HelperFileLoader();
+helperFileLoader.path = PATH_NEWS;
 
-@UseInterceptors(LoggingInterceptor)
 @Controller()
 export class NewsController {
   constructor(
@@ -59,32 +56,33 @@ export class NewsController {
 
   @Post('api/news/')
   @UseInterceptors(
-    FileInterceptor('cover', {
+    FilesInterceptor('cover', 1, {
       storage: diskStorage({
-        destination: helperFileLoaderNews.destinationPath,
-        filename: helperFileLoaderNews.customFileName,
+        destination: helperFileLoader.destinationPath,
+        filename: helperFileLoader.customFileName,
       }),
     }),
   )
   async createNews(
     @Body() dto: CreateNewsDto,
-    @UploadedFile() cover: Express.Multer.File,
+    @UploadedFiles() cover: Express.Multer.File,
   ): Promise<AllNews> {
-    if (cover?.filename) {
-      dto.cover = PATH_NEWS + cover.filename;
+    console.log(cover);
+    if (cover[0]?.filename) {
+      dto.cover = PATH_NEWS + cover[0].filename;
     }
     return this.newService.createNews(dto);
   }
 
-  @Put('api/news/:id')
-  async updateNews(@Param('id') params: IdNewsDto, @Body() dto: NewsEdit) {
+  @Put('api/news/:idNews')
+  async updateNews(@Param() params: IdNewsDto, @Body() dto: NewsEdit) {
     const intId = +params.idNews;
     return this.newService.update(intId, dto);
   }
 
-  @Delete('api/news/:id')
-  async removeNews(@Param() params: IdNewsDto): Promise<string> {
-    const intId = +params.idNews;
+  @Delete('api/news/:idNews')
+  async removeNews(@Param() idNews: IdNewsDto): Promise<string> {
+    const intId = +idNews.idNews;
     const isRemoved =
       (await this.newService.remove(intId)) &&
       (await this.commentService.removeAll(intId));

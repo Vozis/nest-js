@@ -19,6 +19,7 @@ export class NewsService {
   };
 
   async createNews(news: News): Promise<AllNews> {
+    console.log(news);
     const id = getRandomInt(0, 9999);
     const finalNews = {
       ...news,

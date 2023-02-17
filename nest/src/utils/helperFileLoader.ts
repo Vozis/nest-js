@@ -9,7 +9,7 @@ export class HelperFileLoader {
     path = publicPath + _path;
   }
 
-  public customFileName(
+  customFileName(
     req: Request,
     file: Express.Multer.File,
     cb: (error: Error | null, filename: string) => void,
@@ -19,7 +19,7 @@ export class HelperFileLoader {
     cb(null, `${uuidv4()}.${fileExtension}`);
   }
 
-  public destinationPath(
+  destinationPath(
     req: Request,
     file: Express.Multer.File,
     cb: (error: Error | null, filename: string) => void,
