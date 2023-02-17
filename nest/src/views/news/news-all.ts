@@ -1,17 +1,15 @@
 import { CreateNewsDto } from '../../news/dto/create-news.dto';
-import { News } from '../../news/news.interface';
+import { AllNews, News } from '../../news/news.interface';
 
 export const newUrl = 'http://localhost:3000/view/news/';
 
-export function renderNewsAll(news: News[]) {
+export function renderNewsAll(news: AllNews): string {
   let newsListHtml = '';
-  for (const newsItem of news) {
-    newsListHtml += renderNewsAllBlock(newsItem);
+  for (const newsItem in news) {
+    newsListHtml += renderNewsAllBlock(news[newsItem]);
   }
 
   return `<h1>Список новостей</h1>
-
-
 <div class="row container">
     ${newsListHtml}
 </div>

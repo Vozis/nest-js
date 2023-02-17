@@ -1,5 +1,15 @@
+import { IsOptional, IsString } from 'class-validator';
+
 export class UpdateCommentDto {
-  id?: number;
-  message?: string;
-  author?: string;
+  @IsString()
+  @IsOptional()
+  message: string;
+
+  @IsString()
+  @IsOptional()
+  author: string;
+
+  @IsString()
+  @IsOptional()
+  avatar: string;
 }

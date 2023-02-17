@@ -8,6 +8,8 @@ import {
   Param,
   Post,
   Put,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { NewsService } from './news.service';
 import { CreateNewsDto } from './dto/create-news.dto';
@@ -16,9 +18,19 @@ import { CommentsService } from './comments/comments.service';
 import { renderNewsAll } from '../views/news/news-all';
 import { htmlTemplate } from '../views/template';
 import { renderNewsOne } from '../views/news/news-one';
-import { News, NewsEdit } from './news.interface';
+import { AllNews, News, NewsEdit } from './news.interface';
 import { IdNewsDto } from './dto/id-news.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { HelperFileLoader } from '../utils/helperFileLoader';
+import { LoggingInterceptor } from '../interceptors/logging.interceptor';
+import { log } from 'util';
 
+const PATH_NEWS = '/static/news/';
+const helperFileLoaderNews = new HelperFileLoader();
+helperFileLoaderNews.path = PATH_NEWS;
+
+@UseInterceptors(LoggingInterceptor)
 @Controller()
 export class NewsController {
   constructor(
@@ -26,10 +38,60 @@ export class NewsController {
     private readonly commentService: CommentsService,
   ) {}
 
+  // API =================================================
+
   @Get('api/news/all')
-  async getAll(): Promise<News[]> {
+  async getAll(): Promise<AllNews> {
     return this.newService.getAll();
   }
+
+  @Get('api/news/:idNews')
+  async getOneNews(@Param() params: IdNewsDto): Promise<News | Error> {
+    const intId = +params.idNews;
+    const news = await this.newService.find(intId);
+    const comments = this.commentService.findAll(intId);
+
+    return {
+      ...news,
+      comments: comments,
+    };
+  }
+
+  @Post('api/news/')
+  @UseInterceptors(
+    FileInterceptor('cover', {
+      storage: diskStorage({
+        destination: helperFileLoaderNews.destinationPath,
+        filename: helperFileLoaderNews.customFileName,
+      }),
+    }),
+  )
+  async createNews(
+    @Body() dto: CreateNewsDto,
+    @UploadedFile() cover: Express.Multer.File,
+  ): Promise<AllNews> {
+    if (cover?.filename) {
+      dto.cover = PATH_NEWS + cover.filename;
+    }
+    return this.newService.createNews(dto);
+  }
+
+  @Put('api/news/:id')
+  async updateNews(@Param('id') params: IdNewsDto, @Body() dto: NewsEdit) {
+    const intId = +params.idNews;
+    return this.newService.update(intId, dto);
+  }
+
+  @Delete('api/news/:id')
+  async removeNews(@Param() params: IdNewsDto): Promise<string> {
+    const intId = +params.idNews;
+    const isRemoved =
+      (await this.newService.remove(intId)) &&
+      (await this.commentService.removeAll(intId));
+    return isRemoved ? 'Новость удалена' : 'Передан неверный id';
+  }
+
+  // VIEW =================================================
 
   @Get('view/news/')
   async getAllView(): Promise<string> {
@@ -42,8 +104,8 @@ export class NewsController {
   }
 
   @Get('view/news/:idNews/detail')
-  async getOneNewsView(@Param('idNews') idNews: IdNewsDto): Promise<string> {
-    const intId = +idNews;
+  async getOneNewsView(@Param() params: IdNewsDto): Promise<string> {
+    const intId = +params.idNews;
     const news = await this.newService.find(intId);
     const comments = this.commentService.findAll(intId);
     const content = renderNewsOne(news, comments);
@@ -51,36 +113,5 @@ export class NewsController {
       title: 'Новость',
       description: `Самая лучшая новость`,
     });
-  }
-
-  @Get('api/news/:id')
-  async getOneNews(@Param('id') id: IdNewsDto): Promise<News | Error> {
-    const intId = +id;
-    const news = await this.newService.find(intId);
-    const comments = this.commentService.findAll(intId);
-    return {
-      ...news,
-      comments: comments,
-    };
-  }
-
-  @Post('api/news/')
-  async createNews(@Body() dto: News): Promise<News[]> {
-    return this.newService.createNews(dto);
-  }
-
-  @Put('api/news/:id')
-  async updateNews(@Param('id') id: IdNewsDto, @Body() dto: NewsEdit) {
-    const intId = +id;
-    return this.newService.update(intId, dto);
-  }
-
-  @Delete('api/news/:id')
-  async removeNews(@Param('id') id: IdNewsDto): Promise<string> {
-    const intId = +id;
-    const isRemoved =
-      (await this.newService.remove(intId)) &&
-      (await this.commentService.removeAll(intId));
-    return isRemoved ? 'Новость удалена' : 'Передан неверный id';
   }
 }

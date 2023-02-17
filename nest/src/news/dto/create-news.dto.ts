@@ -24,13 +24,13 @@ export class CreateNewsDto {
 
   @IsNumber()
   @IsOptional()
-  countViews?: number;
+  countViews: number;
 
   @IsString()
-  @IsOptional()
-  cover?: string;
+  @ValidateIf((o) => o.cover)
+  cover: string;
 
-  @IsDateString()
-  @IsOptional()
-  createAt?: string;
+  // @IsDateString()
+  // @IsOptional()
+  // createAt: string;
 }

@@ -1,8 +1,19 @@
+import { IsOptional, IsString } from 'class-validator';
+
 export class UpdateNewsDto {
-  id: number;
-  title?: string;
-  description?: string;
-  author?: string;
-  countViews?: number;
-  cover?: string;
+  @IsString()
+  @IsOptional()
+  title: string;
+
+  @IsString()
+  @IsOptional()
+  description: string;
+
+  @IsString()
+  @IsOptional()
+  author: string;
+
+  @IsString()
+  @IsOptional()
+  cover: string;
 }

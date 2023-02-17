@@ -2,13 +2,25 @@ import { Injectable } from '@nestjs/common';
 
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { getRandomInt } from '../../utils/getRandom';
-import { CommentReply } from './comment.interface';
+import { CommentReply, Comments } from './comment.interface';
+import { IdNewsDto } from '../dto/id-news.dto';
+import { CreateCommentDto } from './dto/create-comment.dto';
 
 @Injectable()
 export class CommentsService {
-  private readonly comments = {};
+  private readonly comments = {
+    1: [
+      {
+        message: 'Hello, world!',
+        author: 'User',
+        id: 6784,
+        avatar:
+          'https://media.istockphoto.com/id/476085198/photo/businessman-silhouette-as-avatar-or-default-profile-picture.jpg?s=612x612&w=0&k=20&c=GVYAgYvyLb082gop8rg0XC_wNsu0qupfSLtO7q9wu38=',
+      },
+    ],
+  };
 
-  async create(idNews: number, comment: CommentReply, idComment?: number) {
+  async create(idNews: number, comment: CreateCommentDto, idComment?: number) {
     if (!idComment) {
       if (!this.comments[idNews]) {
         this.comments[idNews] = [];
@@ -16,6 +28,8 @@ export class CommentsService {
 
       this.comments[idNews].push({
         ...comment,
+        avatar:
+          'https://media.istockphoto.com/id/476085198/photo/businessman-silhouette-as-avatar-or-default-profile-picture.jpg?s=612x612&w=0&k=20&c=GVYAgYvyLb082gop8rg0XC_wNsu0qupfSLtO7q9wu38=',
         id: getRandomInt(),
       });
       return comment;
@@ -23,15 +37,19 @@ export class CommentsService {
     return this.findCommentAndReply(this.comments, idComment, comment);
   }
 
-  findAll(idNews: number): CommentReply[] | undefined {
-    return this.comments[idNews];
+  findAll(idNews: number): Comments | undefined {
+    if (this.comments[idNews]) {
+      return this.comments[idNews];
+    }
+
+    // return 'Комментарии не найдены';
   }
 
   async updateComment(
     idNews: number,
     idComment: number,
     dto: UpdateCommentDto,
-  ): Promise<CommentReply[]> {
+  ): Promise<Comments> {
     if (!this.comments[idNews]) {
       return null;
     }
@@ -88,9 +106,8 @@ export class CommentsService {
             ...comments,
             ...comment,
           };
-          console.log(comments);
-          return comments;
         }
+        return comments;
       }
     }
   }

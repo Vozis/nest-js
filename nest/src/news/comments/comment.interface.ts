@@ -1,12 +1,13 @@
 export interface Comment {
-  id?: number;
   message: string;
   author: string;
+  id?: number;
+  avatar?: string;
 }
 
-export interface CommentReply {
-  id?: number;
-  message?: string;
-  author?: string;
+export interface CommentReply extends Partial<Comment> {
   reply?: Comment[];
 }
+export type CommentEdit = Partial<CommentReply>;
+
+export type Comments = Record<string | number, CommentReply>;

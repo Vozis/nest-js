@@ -1,14 +1,15 @@
-import { CommentReply } from './comments/comment.interface';
+import { Comments } from './comments/comment.interface';
 
-export interface News {
+export type News = {
   id?: number;
   title: string;
   description: string;
   author: string;
   countViews?: number;
-  comments?: CommentReply[];
   cover?: string;
-  createAt?: string;
-}
+  comments?: Comments;
+};
 
-export interface NewsEdit extends Partial<News> {}
+export type AllNews = Record<string, News>;
+
+export type NewsEdit = Partial<Omit<News, 'id'>>;
