@@ -41,6 +41,7 @@ function renderCommentsAll(news, comments: Comments) {
        <script> 
        const form = document.getElementById('comment');
        form.addEventListener('submit', (event) => {
+         // event.preventDefault();
          const formData = new FormData(form)
           const requestOptions = {
                   method: 'POST',

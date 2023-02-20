@@ -18,7 +18,7 @@ export class NewsService {
     },
   };
 
-  async createNews(news: News): Promise<AllNews> {
+  async createNews(news: News): Promise<News> {
     console.log(news);
     const id = getRandomInt(0, 9999);
     const finalNews = {
@@ -26,7 +26,7 @@ export class NewsService {
       id: id,
     };
     this.news[id] = finalNews;
-    return this.news;
+    return this.news[id];
   }
 
   async find(id: News['id']): Promise<News> {
@@ -39,7 +39,10 @@ export class NewsService {
     return this.news;
   }
 
-  async update(id: News['id'], newsEdit: NewsEdit): Promise<News | string> {
+  async update(
+    id: News['id'],
+    newsEdit: UpdateNewsDto,
+  ): Promise<News | string> {
     if (this.news[id]) {
       this.news[id] = {
         ...this.news[id],

@@ -20,7 +20,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@nestjs-modules/mailer": "^1.8.1",
     "@nestjs/common": "^9.0.0",
+    "@nestjs/config": "^2.3.1",
     "@nestjs/core": "^9.0.0",
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^9.0.0",
@@ -29,6 +31,10 @@
     "@types/luxon": "^3.2.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
+    "express-handlebars": "^6.0.7",
+    "hbs": "^4.2.0",
+    "lodash": "^4.17.21",
+    "nodemailer": "^6.9.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0"
   },

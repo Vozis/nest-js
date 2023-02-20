@@ -9,16 +9,22 @@ import { AppService } from './app.service';
 import { NewsModule } from './news/news.module';
 import { StudyModule } from './study/study.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { resolve } from 'path';
+import { join } from 'path';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
+import { MailModule } from './mail/mail.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     NewsModule,
     StudyModule,
     ServeStaticModule.forRoot({
-      rootPath: resolve(__dirname, '..', 'public'),
+      rootPath: join(__dirname, '..', 'public'),
     }),
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

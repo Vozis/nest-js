@@ -19,10 +19,11 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { HelperFileLoader } from '../../utils/helperFileLoader';
+import { imageFileFilter } from '../../utils/imageFileFilter';
 
-const PATH_COMMENTS = '/comments-static/';
-const helperFileLoader = new HelperFileLoader();
-helperFileLoader.path = PATH_COMMENTS;
+const PATH_COMMENTS = '/static/';
+const helperFileLoaderComment = new HelperFileLoader();
+helperFileLoaderComment.path = PATH_COMMENTS;
 
 @Controller()
 export class CommentsController {
@@ -32,9 +33,10 @@ export class CommentsController {
   @UseInterceptors(
     FilesInterceptor('avatar', 1, {
       storage: diskStorage({
-        destination: helperFileLoader.destinationPath,
-        filename: helperFileLoader.customFileName,
+        destination: helperFileLoaderComment.destinationPath,
+        filename: helperFileLoaderComment.customFileName,
       }),
+      fileFilter: imageFileFilter,
     }),
   )
   create(
@@ -42,7 +44,7 @@ export class CommentsController {
     @Body() dto: CreateCommentDto,
     @UploadedFiles() avatar: Express.Multer.File,
   ) {
-    // console.log(avatar);
+    console.log(avatar);
     const idNewsInt = +params.idNews;
     if (avatar[0]?.filename) {
       dto.avatar = PATH_COMMENTS + avatar[0].filename;
@@ -52,13 +54,31 @@ export class CommentsController {
   }
 
   @Post('api/comments/:idNews/:idComment')
+  @UseInterceptors(
+    FilesInterceptor('avatar', 1, {
+      storage: diskStorage({
+        destination: helperFileLoaderComment.destinationPath,
+        filename: helperFileLoaderComment.customFileName,
+      }),
+      fileFilter: imageFileFilter,
+    }),
+  )
   replyToComment(
     @Param() idNews: IdNewsDto,
     @Param() idComment: IdCommentDto,
     @Body() dto: CreateCommentDto,
+    @UploadedFiles() avatarReply: Express.Multer.File,
   ) {
     const idNewsInt = +idNews.idNews;
     const idCommentInt = +idComment.idComment;
+
+    if (!avatarReply) {
+      if (!avatarReply[0]?.filename) {
+        dto.avatar = PATH_COMMENTS + avatarReply[0].filename;
+      }
+    }
+
+    console.log(dto);
     return this.commentsService.create(idNewsInt, dto, idCommentInt);
   }
 

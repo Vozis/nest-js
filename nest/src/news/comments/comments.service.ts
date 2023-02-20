@@ -11,9 +11,9 @@ export class CommentsService {
   private readonly comments = {
     1: [
       {
+        id: 6784,
         message: 'Hello, world!',
         author: 'User',
-        id: 6784,
         avatar:
           'https://media.istockphoto.com/id/476085198/photo/businessman-silhouette-as-avatar-or-default-profile-picture.jpg?s=612x612&w=0&k=20&c=GVYAgYvyLb082gop8rg0XC_wNsu0qupfSLtO7q9wu38=',
       },
@@ -26,14 +26,18 @@ export class CommentsService {
         this.comments[idNews] = [];
       }
 
+      if (!comment.avatar) {
+        comment.avatar =
+          'https://media.istockphoto.com/id/476085198/photo/businessman-silhouette-as-avatar-or-default-profile-picture.jpg?s=612x612&w=0&k=20&c=GVYAgYvyLb082gop8rg0XC_wNsu0qupfSLtO7q9wu38=';
+      }
+
       this.comments[idNews].push({
-        ...comment,
-        avatar:
-          'https://media.istockphoto.com/id/476085198/photo/businessman-silhouette-as-avatar-or-default-profile-picture.jpg?s=612x612&w=0&k=20&c=GVYAgYvyLb082gop8rg0XC_wNsu0qupfSLtO7q9wu38=',
         id: getRandomInt(),
+        ...comment,
       });
       return comment;
     }
+
     return this.findCommentAndReply(this.comments, idComment, comment);
   }
 
@@ -75,7 +79,11 @@ export class CommentsService {
     return delete this.comments?.[idNews];
   }
 
-  private findCommentAndReply(comments, idComment, comment) {
+  private findCommentAndReply(
+    comments,
+    idComment: number,
+    comment: CreateCommentDto,
+  ) {
     for (const property in comments) {
       if (comments.hasOwnProperty(property)) {
         if (typeof comments[property] === 'object') {
@@ -85,9 +93,13 @@ export class CommentsService {
           if (!comments['reply']) {
             comments['reply'] = [];
           }
+          if (!comment.avatar) {
+            comment.avatar =
+              'https://media.istockphoto.com/id/476085198/photo/businessman-silhouette-as-avatar-or-default-profile-picture.jpg?s=612x612&w=0&k=20&c=GVYAgYvyLb082gop8rg0XC_wNsu0qupfSLtO7q9wu38=';
+          }
           comments['reply'].push({
-            ...comment,
             id: getRandomInt(),
+            ...comment,
           });
           return comment;
         }
@@ -98,7 +110,7 @@ export class CommentsService {
   private findAndEdit(comments, idComment, comment) {
     for (const property in comments) {
       if (comments.hasOwnProperty(property)) {
-        if (typeof comments[property] === 'object') {
+        if (typeof comments[property] == 'object') {
           this.findAndEdit(comments[property], idComment, comment);
         }
         if (comments[property] == idComment) {
@@ -106,6 +118,7 @@ export class CommentsService {
             ...comments,
             ...comment,
           };
+          return comments;
         }
         return comments;
       }
