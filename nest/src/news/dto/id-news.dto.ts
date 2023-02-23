@@ -1,7 +1,7 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class IdNewsDto {
-  @IsString({ message: 'id Должно быть строкой' })
+  @IsNumber()
   @IsNotEmpty({ message: 'Поле id не должно быть пустым' })
-  idNews: string;
+  idNews: number;
 }

@@ -3,64 +3,75 @@ import { CreateNewsDto } from './dto/create-news.dto';
 import { UpdateNewsDto } from './dto/update-news.dto';
 import { getRandomInt } from '../utils/getRandom';
 import { AllNews, News, NewsEdit } from './news.interface';
+import { InjectRepository } from '@nestjs/typeorm';
+import { NewsEntity } from './entities/news.entity';
+import { Repository } from 'typeorm';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class NewsService {
-  private readonly news: AllNews = {
-    1: {
-      id: 1,
-      title: 'news 1',
-      description: 'this is news 1',
-      author: 'User',
-      countViews: 12,
-      cover:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT91bLZ_uuyT35AFwAb_dwQ9k9XgOAdy296g47XGCNF&s',
-    },
-  };
+  constructor(
+    @InjectRepository(NewsEntity)
+    private readonly newsRepository: Repository<NewsEntity>,
+    private readonly usersService: UsersService,
+  ) {}
 
-  async createNews(news: News): Promise<News> {
-    console.log(news);
-    const id = getRandomInt(0, 9999);
-    const finalNews = {
-      ...news,
-      id: id,
-    };
-    this.news[id] = finalNews;
-    return this.news[id];
+  async createNews(dto: CreateNewsDto): Promise<NewsEntity> {
+    const newsEntity = new NewsEntity();
+    newsEntity.title = dto.title;
+    newsEntity.description = dto.description;
+    newsEntity.cover = dto.cover;
+    const _user = await this.usersService.findOne(+dto.userId);
+    newsEntity.user = _user;
+    const news = await this.newsRepository.create(newsEntity);
+    return this.newsRepository.save(news);
+  }
+  async findById(id: number): Promise<NewsEntity> {
+    return this.newsRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
   }
 
-  async find(id: News['id']): Promise<News> {
-    if (this.news[id]) {
-      return this.news[id];
-    }
-  }
-
-  async getAll(): Promise<AllNews> {
-    return this.news;
+  async getAll(): Promise<NewsEntity[]> {
+    return this.newsRepository.find({
+      relations: {
+        user: true,
+      },
+    });
   }
 
   async update(
     id: News['id'],
     newsEdit: UpdateNewsDto,
-  ): Promise<News | string> {
-    if (this.news[id]) {
-      this.news[id] = {
-        ...this.news[id],
-        ...newsEdit,
-      };
+  ): Promise<NewsEntity | string> {
+    // return this.newsRepository.update('news', 1, {
+    //   ...newsEdit,
+    // });
+    let updatedNews = await this.newsRepository.findOneBy({
+      id,
+    });
 
-      return this.news[id];
+    if (!updatedNews) {
+      return 'Новость не найдена';
     }
 
-    return 'Новость не найдена';
+    updatedNews = {
+      ...updatedNews,
+      ...newsEdit,
+    };
+
+    return this.newsRepository.save(updatedNews);
   }
 
-  async remove(id: News['id']): Promise<boolean> {
-    if (this.news[id]) {
-      delete this.news[id];
-      return true;
+  async remove(id: News['id']): Promise<NewsEntity | string> {
+    const removedNews = await this.newsRepository.findOneBy({
+      id,
+    });
+    if (!removedNews) {
+      return 'Новость не найдена';
     }
 
-    return false;
+    return this.newsRepository.remove(removedNews);
   }
 }

@@ -6,6 +6,7 @@ import {
   HttpException,
   HttpStatus,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Redirect,
@@ -28,6 +29,7 @@ import { HelperFileLoader } from '../utils/helperFileLoader';
 import { imageFileFilter } from '../utils/imageFileFilter';
 import { MailService } from '../mail/mail.service';
 import { UpdateNewsDto } from './dto/update-news.dto';
+import { NewsEntity } from './entities/news.entity';
 
 const PATH_NEWS = '/static/';
 const helperFileLoaderNews = new HelperFileLoader();
@@ -44,19 +46,30 @@ export class NewsController {
   // API =================================================
 
   @Get('api/news/all')
-  async getAll(): Promise<AllNews> {
+  async getAll(): Promise<NewsEntity[]> {
     return this.newService.getAll();
   }
 
   @Get('api/news/:idNews')
-  async getOneNews(@Param() params: IdNewsDto): Promise<News | Error> {
-    const intId = +params.idNews;
-    const news = await this.newService.find(intId);
-    const comments = this.commentService.findAll(intId);
+  async getOneNews(
+    @Param('idNews', ParseIntPipe) idNews: number,
+  ): Promise<NewsEntity | Error> {
+    const news = await this.newService.findById(idNews);
+
+    if (!news) {
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: 'error',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    // const comments = this.commentService.findAll(intId);
 
     return {
       ...news,
-      comments: comments,
+      // comments: comments,
     };
   }
 
@@ -73,15 +86,15 @@ export class NewsController {
   async createNews(
     @Body() dto: CreateNewsDto,
     @UploadedFiles() cover: Express.Multer.File,
-  ): Promise<News> {
+  ): Promise<NewsEntity> {
     if (cover[0]?.filename) {
       dto.cover = PATH_NEWS + cover[0].filename;
     }
     const _news = await this.newService.createNews(dto);
-    await this.mailService.sendNewNewsForAdmins(
-      ['sizov.ilya1996@gmail.com'],
-      _news,
-    );
+    // await this.mailService.sendNewNewsForAdmins(
+    //   ['sizov.ilya1996@gmail.com'],
+    //   _news,
+    // );
 
     return _news;
   }
@@ -97,36 +110,53 @@ export class NewsController {
     }),
   )
   async updateNews(
-    @Param() params: IdNewsDto,
+    @Param('idNews', ParseIntPipe) idNews: number,
     @Body() dto: UpdateNewsDto,
     @UploadedFiles() coverUpdate: Express.Multer.File,
   ) {
-    const intId = +params.idNews;
-    const previousNews = await this.newService.find(intId);
+    const previousNews = await this.newService.findById(idNews);
+
+    if (!previousNews) {
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: 'Новость не найдена',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
 
     if (coverUpdate[0]?.filename) {
       dto.cover = PATH_NEWS + coverUpdate[0].filename;
     }
-    const updatedNews = await this.newService.update(intId, dto);
+    const updatedNews = await this.newService.update(idNews, dto);
 
-    if (typeof updatedNews === 'object') {
-      await this.mailService.sendEditNewsForAdmins(
-        ['sizov.ilya1996@gmail.com'],
-        previousNews,
-        updatedNews,
-      );
-    }
+    // if (typeof updatedNews === 'object') {
+    //   await this.mailService.sendEditNewsForAdmins(
+    //     ['sizov.ilya1996@gmail.com'],
+    //     previousNews,
+    //     updatedNews,
+    //   );
+    // }
 
     return updatedNews;
   }
 
   @Delete('api/news/:idNews')
-  async removeNews(@Param() idNews: IdNewsDto): Promise<string> {
-    const intId = +idNews.idNews;
+  async removeNews(
+    @Param('idNews', ParseIntPipe) idNews: number,
+  ): Promise<string> {
     const isRemoved =
-      (await this.newService.remove(intId)) &&
-      (await this.commentService.removeAll(intId));
-    return isRemoved ? 'Новость удалена' : 'Передан неверный id';
+      (await this.newService.remove(idNews)) &&
+      (await this.commentService.removeAll(idNews));
+
+    throw new HttpException(
+      {
+        status: HttpStatus.OK,
+        error: isRemoved ? 'Новость удалена' : 'Передан неверный id',
+      },
+      HttpStatus.OK,
+    );
   }
 
   // VIEW =================================================
@@ -135,34 +165,30 @@ export class NewsController {
   @Render('news-list')
   async getAllView() {
     const news = await this.newService.getAll();
-    console.log(news);
     return { news, title: 'Список новостей' };
-
-    // const content = renderNewsAll(news);
-    // return htmlTemplate(content, {
-    //   title: 'Список новостей',
-    //   description: 'Самые крутые новости на свете ',
-    // });
   }
 
   @Get('view/news/:idNews/detail')
   @Render('news-detail')
-  async getOneNewsView(@Param() params: IdNewsDto) {
-    const intId = +params.idNews;
-    const news = await this.newService.find(intId);
-    const comments = this.commentService.findAll(intId);
+  async getOneNewsView(@Param('idNews', ParseIntPipe) idNews: number) {
+    const news = await this.newService.findById(idNews);
+    const comments = this.commentService.findAll(idNews);
+
+    if (!news) {
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: 'Новость не найдена',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
 
     return {
       news,
       comments,
       title: 'Самая лучшая новость',
     };
-
-    // const content = renderNewsOne(news, comments);
-    // return htmlTemplate(content, {
-    //   title: 'Новость',
-    //   description: `Самая лучшая новость`,
-    // });
   }
 
   @Get('view/news/create')

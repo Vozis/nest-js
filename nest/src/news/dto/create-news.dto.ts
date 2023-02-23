@@ -33,4 +33,8 @@ export class CreateNewsDto {
   // @IsDateString()
   // @IsOptional()
   // createAt: string;
+
+  @IsString()
+  @IsNotEmpty()
+  userId: string;
 }
