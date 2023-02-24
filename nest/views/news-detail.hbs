@@ -1,0 +1,70 @@
+{{#if news}}
+<a class='btn btn-primary' style='margin: 20px 0 20px 0' href='http://localhost:3000/news/all'>К списку новостей</a>
+<div class="card news" data-id='{{news.id}}'>
+  <img src='{{news.cover}}'
+       class="card-img-top" style="height: 200px; object-fit: cover;" alt=''/>
+  <div class="card-body">
+    <h5 class="card-title">{{news.title}}</h5>
+    <h6 class="card-subtitle mb-2 text-muted">Автор:
+      {{news.user.firstName}} {{news.user.lastName}}</h6>
+    <p class="card-text">{{news.description}}</p>
+  </div>
+</div>
+{{#if news.comments}}
+  <div class="row" style='margin-top: 20px'>
+      <div class="col-lg-6 mt-3">
+    <h2>Список комментариев:</h2>
+    {{#each news.comments}}
+        <div class="card p-2 mt-2">
+          <div class="d-flex align-items-center">
+            <img src="{{this.user.avatar}}" class="float-left rounded-circle" style='margin-right: 10px; width: 70px; height: 70px'/>
+            <div>
+              <h6 class="card-subtitle mb-2 text-muted">Автор: {{this.user.firstName}} {{this.user.lastName}}</h6>
+              <p class="card-text">Сообщение: {{this.message}}</p>
+            </div>
+          </div>
+          <hr/>
+          <h6 class='card-subtitle m-2'>Ответить на комментарий:</h6>
+          {{>reply-comment-form}}
+          <hr/>
+          {{#if this.reply}}
+            <div class="row" style='margin-top: 20px'>
+              <div class="col-lg-6">
+              <h5>Ответы:</h5>
+              {{#each this.reply}}
+                  <div class="card p-2 mt-2">
+                    <div class="d-flex align-items-center">
+                      <img src="{{this.avatar}}" class="float-left rounded-circle" style='margin-right: 10px; width: 70px'/>
+                      <div>
+                        <h6 class="card-subtitle mb-2 text-muted">Автор: {{this.author}}</h6>
+                        <p class="card-text">Сообщение: {{this.message}}</p>
+                      </div>
+                    </div>
+                  </div>
+              {{/each}}
+              </div>
+            </div>
+          {{else}}
+            <div>
+            <h6  class='card-subtitle m-2'>Ответов пока нет</h6>
+            </div>
+          {{/if}}
+        </div>
+    {{/each}}
+    <h4 style='margin-top: 20px'>Добавить комментарий:</h4>
+    {{>create-comment-form}}
+      </div>
+  </div>
+{{else}}
+  <div>
+  <h4>Комментариев пока нет</h4>
+  <h3 style='margin-top: 20px'>Добавить комментарий:</h3>
+  {{>create-comment-form}}
+  </div>
+{{/if}}
+
+  {{else}}
+  <h3>Новость не найдена</h3>
+  <a class='btn btn-primary' style='margin: 20px 0 20px 0' href='http://localhost:3000/view/news/'>К списку новостей</a>
+{{/if}}
+
