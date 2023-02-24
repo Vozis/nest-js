@@ -1,15 +1,11 @@
 <form id='formComments'>
       <div class='mb-3'>
-        <label class='form=label' for='authorInput'>Автор</label>
-        <input type='text' class='form-control' name='author' id='authorInput' required/>
-      </div>
-      <div class='mb-3'>
         <label class='form=label' for='messageInput'>Сообщение</label>
         <input type='text' class='form-control' name='message' id='messageInput' required/>
       </div>
-      <div class='form-group'>
-        <label class='form=label' for='cover'>Аватар</label>
-        <input type='file' class='form-control-file' name='avatar' id='avatar' required/>
+      <div class='mb-3'>
+        <label class='form=label' for='authorInput'>Автор</label>
+        <input type='text' class='form-control' name='userId' id='authorInput' required/>
       </div>
       <button class='btn btn-primary' type='button' id='submitComment'>Создать</button>
     </form>
@@ -17,17 +13,20 @@
     const createComment = async () => {
       try {
         const form = document.getElementById('formComments')
-        const formData = new FormData(form)
-        for (const d of formData.entries()) {
-          console.log(d);
-        }
-        let response = await fetch(`http://localhost:3000/api/comments/{{news.id}}`, {
+        let obj = {}
+        const formData = new FormData(form);
+        const plainFormData = Object.fromEntries((formData.entries()))
+
+const json = JSON.stringify(plainFormData)
+        // formData.forEach((value, key) => obj[key] = value)
+        // const json = JSON.stringify(obj)
+        // console.log(json);
+        let response = await fetch(`http://localhost:3000/comments/api/{{news.id}}`, {
           method: 'POST',
-          body: formData,
-        });
-        const result = await response.json().then(() => {
-          window.location.reload();
+          body: json,
         })
+const result = await response.json();
+        console.log(result);
 
         return result;
       } catch (e) {
@@ -35,7 +34,6 @@
       }
     }
     document.getElementById('submitComment').addEventListener('click', (e) => {
-      console.log('click');
       createComment()
     });
   </script>

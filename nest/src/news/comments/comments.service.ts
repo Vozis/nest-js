@@ -1,163 +1,170 @@
-import { Injectable } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 
 import { UpdateCommentDto } from './dto/update-comment.dto';
-import { getRandomInt } from '../../utils/getRandom';
-import { CommentReply, Comments } from './comment.interface';
-import { IdNewsDto } from '../dto/id-news.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { CommentsEntity } from './entities/comments.entity';
+import { Repository } from 'typeorm';
+
+import { NewsService } from '../news.service';
+import { UsersService } from '../../users/users.service';
 
 @Injectable()
 export class CommentsService {
-  private readonly comments = {
-    1: [
-      {
-        id: 6784,
-        message: 'Hello, world!',
-        author: 'User',
-        avatar:
-          'https://media.istockphoto.com/id/476085198/photo/businessman-silhouette-as-avatar-or-default-profile-picture.jpg?s=612x612&w=0&k=20&c=GVYAgYvyLb082gop8rg0XC_wNsu0qupfSLtO7q9wu38=',
-      },
-    ],
-  };
+  constructor(
+    @InjectRepository(CommentsEntity)
+    private readonly commentsRepository: Repository<CommentsEntity>,
+    @Inject(forwardRef(() => NewsService))
+    private readonly newsService: NewsService,
+    private readonly usersService: UsersService,
+  ) {}
 
   async create(idNews: number, comment: CreateCommentDto, idComment?: number) {
     if (!idComment) {
-      if (!this.comments[idNews]) {
-        this.comments[idNews] = [];
+      const _news = await this.newsService.findById(idNews);
+
+      if (!_news) {
+        throw new HttpException(
+          {
+            status: HttpStatus.NOT_FOUND,
+            error: 'Новость не найдена',
+          },
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      const _user = await this.usersService.findOne(+comment.userId);
+
+      if (!_user) {
+        throw new HttpException(
+          {
+            status: HttpStatus.NOT_FOUND,
+            error: 'Пользователь не найден',
+          },
+          HttpStatus.NOT_FOUND,
+        );
       }
 
-      if (!comment.avatar) {
-        comment.avatar =
-          'https://media.istockphoto.com/id/476085198/photo/businessman-silhouette-as-avatar-or-default-profile-picture.jpg?s=612x612&w=0&k=20&c=GVYAgYvyLb082gop8rg0XC_wNsu0qupfSLtO7q9wu38=';
-      }
+      const createdComment = new CommentsEntity();
+      createdComment.message = comment.message;
+      createdComment.user = _user;
+      createdComment.news = _news;
+      const newComment = await this.commentsRepository.create(createdComment);
 
-      this.comments[idNews].push({
-        id: getRandomInt(),
-        ...comment,
-      });
-      return comment;
+      return this.commentsRepository.save(newComment);
     }
 
-    return this.findCommentAndReply(this.comments, idComment, comment);
-  }
-
-  findAll(idNews: number): Comments | undefined {
-    if (this.comments[idNews]) {
-      return this.comments[idNews];
-    }
-
-    // return 'Комментарии не найдены';
+    // return this.findCommentAndReply(this.comments, idComment, comment);
   }
 
   async updateComment(
-    idNews: number,
-    idComment: number,
-    dto: UpdateCommentDto,
-  ): Promise<Comments> {
-    if (!this.comments[idNews]) {
-      return null;
-    }
-    return this.findAndEdit(this.comments, idComment, dto);
+    id: number,
+    commentsEdit: UpdateCommentDto,
+  ): Promise<CommentsEntity> {
+    const _comment = await this.commentsRepository.findOneBy({
+      id,
+    });
+    _comment.message = commentsEdit.message;
+
+    return this.commentsRepository.save(_comment);
+
+    // if (!this.comments[idNews]) {
+    //   return null;
+    // }
+    // return this.findAndEdit(this.comments, idComment, dto);
   }
 
-  async remove(idNews: number, idComment: number): Promise<boolean> {
-    if (!this.comments[idNews]) {
-      return null;
-    }
-    const commentIndex = this.comments[idNews].findIndex(
-      (c) => c.id === idComment,
-    );
-    if (commentIndex !== -1) {
-      this.comments[idNews].splice(commentIndex, 1);
-      return true;
-    }
-
-    return false;
-  }
-
-  async removeAll(idNews: number): Promise<boolean> {
-    return delete this.comments?.[idNews];
-  }
-
-  private findCommentAndReply(
-    comments,
-    idComment: number,
-    comment: CreateCommentDto,
-  ) {
-    for (const property in comments) {
-      if (comments.hasOwnProperty(property)) {
-        if (typeof comments[property] === 'object') {
-          this.findCommentAndReply(comments[property], idComment, comment);
-        }
-        if (comments[property] == idComment) {
-          if (!comments['reply']) {
-            comments['reply'] = [];
-          }
-          if (!comment.avatar) {
-            comment.avatar =
-              'https://media.istockphoto.com/id/476085198/photo/businessman-silhouette-as-avatar-or-default-profile-picture.jpg?s=612x612&w=0&k=20&c=GVYAgYvyLb082gop8rg0XC_wNsu0qupfSLtO7q9wu38=';
-          }
-          comments['reply'].push({
-            id: getRandomInt(),
-            ...comment,
-          });
-          return comment;
-        }
-      }
-    }
-  }
-
-  private findAndEdit(comments, idComment, comment) {
-    for (const property in comments) {
-      if (comments.hasOwnProperty(property)) {
-        if (typeof comments[property] == 'object') {
-          this.findAndEdit(comments[property], idComment, comment);
-        }
-        if (comments[property] == idComment) {
-          comments = {
-            ...comments,
-            ...comment,
-          };
-          return comments;
-        }
-        return comments;
-      }
-    }
-  }
-}
-
-/*
-async create(
-  idNews: number,
-  comment: CommentWithReplyDto,
-  idComment?: string,
-): Promise<CommentWithReplyDto> {
-  if (!this.comments[idNews]) {
-  this.comments[idNews] = [];
-}
-
-const parentCommentIndex = this.comments[idNews].findIndex(
-  (el) => el.id === comment.id,
-);
-
-if (parentCommentIndex !== -1) {
-  this.comments[idNews][parentCommentIndex] = {
-    ...this.comments[idNews][parentCommentIndex],
-    reply: [
-      ...this.comments[idNews][parentCommentIndex].reply,
-      {
-        ...comment,
-        id: getRandomInt(),
+  async findAll(idNews: number): Promise<CommentsEntity[]> {
+    return this.commentsRepository.find({
+      where: {
+        news: {
+          id: idNews,
+        },
       },
-    ],
-  };
-  return this.comments[idNews][parentCommentIndex];
-}
+      relations: ['user'],
+    });
+  }
 
-this.comments[idNews].push({
-  ...comment,
-  id: getRandomInt(),
-  reply: [],
-});
-return comment;
-}*/
+  async findById(id: number): Promise<CommentsEntity> {
+    return this.commentsRepository.findOne({
+      where: { id },
+      relations: {
+        user: true,
+      },
+    });
+  }
+
+  async remove(id: number): Promise<CommentsEntity> {
+    const _comment = await this.commentsRepository.findOneBy({
+      id,
+    });
+
+    if (!_comment) {
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: 'Комментарий не найден',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return this.commentsRepository.remove(_comment);
+  }
+
+  async removeAll(idNews: number) {
+    const removedComments = await this.findAll(idNews);
+    return this.commentsRepository.remove(removedComments);
+  }
+
+  // private findCommentAndReply(
+  //   comments,
+  //   idComment: number,
+  //   comment: CreateCommentDto,
+  // ) {
+  //   for (const property in comments) {
+  //     if (comments.hasOwnProperty(property)) {
+  //       if (typeof comments[property] === 'object') {
+  //         this.findCommentAndReply(comments[property], idComment, comment);
+  //       }
+  //       if (comments[property] == idComment) {
+  //         if (!comments['reply']) {
+  //           comments['reply'] = [];
+  //         }
+  //         if (!comment.avatar) {
+  //           comment.avatar =
+  //             'https://media.istockphoto.com/id/476085198/photo/businessman-silhouette-as-avatar-or-default-profile-picture.jpg?s=612x612&w=0&k=20&c=GVYAgYvyLb082gop8rg0XC_wNsu0qupfSLtO7q9wu38=';
+  //         }
+  //         comments['reply'].push({
+  //           id: getRandomInt(),
+  //           ...comment,
+  //         });
+  //         return comment;
+  //       }
+  //     }
+  //   }
+  // }
+
+  // private findAndEdit(comments, idComment, comment) {
+  //   for (const property in comments) {
+  //     if (comments.hasOwnProperty(property)) {
+  //       if (typeof comments[property] == 'object') {
+  //         this.findAndEdit(comments[property], idComment, comment);
+  //       }
+  //       if (comments[property] == idComment) {
+  //         comments = {
+  //           ...comments,
+  //           ...comment,
+  //         };
+  //         return comments;
+  //       }
+  //       return comments;
+  //     }
+  //   }
+  // }
+}

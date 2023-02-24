@@ -15,6 +15,7 @@ import { MailModule } from './mail/mail.module';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
+import { CommentsModule } from './news/comments/comments.module';
 
 @Module({
   imports: [
@@ -32,13 +33,14 @@ import { UsersModule } from './users/users.module';
       autoLoadEntities: true,
       synchronize: true,
     }),
-    NewsModule,
     StudyModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
     }),
     MailModule,
+    NewsModule,
     UsersModule,
+    CommentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

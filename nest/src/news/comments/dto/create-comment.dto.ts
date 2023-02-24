@@ -1,13 +1,15 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateCommentDto {
   @IsString({ message: 'Поле message должно быть строкой' })
+  @IsNotEmpty()
   message: string;
 
-  @IsString({ message: 'Поле author должно быть строкой' })
-  author: string;
-
   @IsString()
-  @IsOptional()
-  avatar: string;
+  @IsNotEmpty()
+  userId: string;
+
+  // @IsString()
+  // @IsNotEmpty()
+  // newsId: string;
 }

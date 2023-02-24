@@ -3,7 +3,10 @@ import {
   Controller,
   Delete,
   Get,
+  HttpException,
+  HttpStatus,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   UploadedFile,
@@ -20,98 +23,73 @@ import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { HelperFileLoader } from '../../utils/helperFileLoader';
 import { imageFileFilter } from '../../utils/imageFileFilter';
+import { CommentsEntity } from './entities/comments.entity';
+import { NewsService } from '../news.service';
 
-const PATH_COMMENTS = '/static/';
-const helperFileLoaderComment = new HelperFileLoader();
-helperFileLoaderComment.path = PATH_COMMENTS;
-
-@Controller()
+@Controller('comments')
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
-  @Post('api/comments/:idNews')
-  @UseInterceptors(
-    FilesInterceptor('avatar', 1, {
-      storage: diskStorage({
-        destination: helperFileLoaderComment.destinationPath,
-        filename: helperFileLoaderComment.customFileName,
-      }),
-      fileFilter: imageFileFilter,
-    }),
-  )
-  create(
-    @Param() params: IdNewsDto,
-    @Body() dto: CreateCommentDto,
-    @UploadedFiles() avatar: Express.Multer.File,
-  ) {
-    console.log(avatar);
-    const idNewsInt = +params.idNews;
-    if (avatar[0]?.filename) {
-      dto.avatar = PATH_COMMENTS + avatar[0].filename;
+  @Get('api/details/:idNews')
+  async findAllCommentsForNews(
+    @Param('idNews', ParseIntPipe) idNews: number,
+  ): Promise<CommentsEntity[]> {
+    const comments = await this.commentsService.findAll(idNews);
+
+    if (comments.length == 0) {
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: 'Комментарии отсутствуют',
+        },
+        HttpStatus.NOT_FOUND,
+      );
     }
 
-    return this.commentsService.create(idNewsInt, dto);
+    return comments;
   }
 
-  @Post('api/comments/:idNews/:idComment')
-  @UseInterceptors(
-    FilesInterceptor('avatar', 1, {
-      storage: diskStorage({
-        destination: helperFileLoaderComment.destinationPath,
-        filename: helperFileLoaderComment.customFileName,
-      }),
-      fileFilter: imageFileFilter,
-    }),
-  )
+  @Post('api/:idNews')
+  create(
+    @Param('idNews', ParseIntPipe) idNews: number,
+    @Body() dto: CreateCommentDto,
+  ) {
+    return this.commentsService.create(idNews, dto);
+  }
+
+  @Put('api/:idComment')
+  async UpdateComment(
+    @Param('idComment', ParseIntPipe) idComment: number,
+    @Body() dto: UpdateCommentDto,
+  ): Promise<CommentsEntity> {
+    return this.commentsService.updateComment(idComment, dto);
+  }
+
+  @Delete('api/comments/:idComment')
+  deleteComment(
+    @Param('idComment', ParseIntPipe) idComment: number,
+  ): Promise<CommentsEntity> {
+    return this.commentsService.remove(idComment);
+  }
+
+  @Delete('api/comments/:idNews')
+  deleteAll(@Param('idNews', ParseIntPipe) idNews: number) {
+    return this.commentsService.removeAll(idNews);
+  }
+
+  /*@Post('api/comments/:idNews/:idComment')
   replyToComment(
     @Param() idNews: IdNewsDto,
     @Param() idComment: IdCommentDto,
     @Body() dto: CreateCommentDto,
-    @UploadedFiles() avatarReply: Express.Multer.File,
   ) {
     const idNewsInt = +idNews.idNews;
     const idCommentInt = +idComment.idComment;
 
     if (!avatarReply) {
-      if (!avatarReply[0]?.filename) {
-        dto.avatar = PATH_COMMENTS + avatarReply[0].filename;
-      }
     }
 
     console.log(dto);
     return this.commentsService.create(idNewsInt, dto, idCommentInt);
-  }
-
-  @Get('api/comments/:idNews')
-  findAll(@Param() params: IdNewsDto): Comments {
-    const intIdNews = +params.idNews;
-    return this.commentsService.findAll(intIdNews);
-  }
-
-  @Delete('api/comments/:idNews/:idComment')
-  deleteComment(
-    @Param() idNews: IdNewsDto,
-    @Param() idComment: IdCommentDto,
-  ): Promise<boolean> {
-    const idNewsInt = +idNews.idNews;
-    const idCommentInt = +idComment.idComment;
-    return this.commentsService.remove(idNewsInt, idCommentInt);
-  }
-
-  @Delete('api/comments/:idNews')
-  deleteAll(@Param() params: IdNewsDto) {
-    const idNewsInt = +params.idNews;
-    return this.commentsService.removeAll(idNewsInt);
-  }
-
-  @Put('api/comments/:idNews/:idComment')
-  UpdateComment(
-    @Param() idNews: IdNewsDto,
-    @Param() idComment: IdCommentDto,
-    @Body() dto: UpdateCommentDto,
-  ): Promise<Comments> {
-    const idNewsInt = +idNews.idNews;
-    const idCommentInt = +idComment.idComment;
-    return this.commentsService.updateComment(idNewsInt, idCommentInt, dto);
-  }
+  }*/
 }

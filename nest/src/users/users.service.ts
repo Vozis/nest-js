@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,11 +14,16 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto) {
     const user = await this.usersRepository.create(createUserDto);
+    if (!createUserDto.avatar) {
+      user.avatar =
+        'https://media.istockphoto.com/id/476085198/photo/businessman-silhouette-as-avatar-or-default-profile-picture.jpg?s=612x612&w=0&k=20&c=GVYAgYvyLb082gop8rg0XC_wNsu0qupfSLtO7q9wu38=';
+    }
+
     return this.usersRepository.save(user);
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll() {
+    return this.usersRepository.find();
   }
 
   async findOne(id: number) {
@@ -27,8 +32,27 @@ export class UsersService {
     });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    let _user = await this.usersRepository.findOneBy({
+      id,
+    });
+
+    if (!_user) {
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: 'Такого пользователя не существует',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    _user = {
+      ..._user,
+      ...updateUserDto,
+    };
+
+    return this.usersRepository.save(_user);
   }
 
   remove(id: number) {
