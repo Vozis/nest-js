@@ -12,6 +12,7 @@ import {
   Query,
   Render,
   UploadedFiles,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { NewsService } from './news.service';
@@ -25,6 +26,9 @@ import { MailService } from '../mail/mail.service';
 import { UpdateNewsDto } from './dto/update-news.dto';
 import { NewsEntity } from './entities/news.entity';
 import { isEmpty } from 'lodash';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Roles } from '../auth/role/roles.decorator';
+import { Role } from '../auth/role/role.enum';
 
 const PATH_NEWS = '/static/';
 const helperFileLoaderNews = new HelperFileLoader();
@@ -66,6 +70,8 @@ export class NewsController {
     };
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Roles(Role.Admin, Role.Moderator)
   @Post('api/')
   @UseInterceptors(
     FilesInterceptor('cover', 1, {
