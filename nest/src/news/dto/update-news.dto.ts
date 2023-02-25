@@ -10,9 +10,6 @@ export class UpdateNewsDto {
   @IsOptional()
   description: string;
 
-  @IsString()
-  @IsOptional()
-  author: string;
 
   @IsString()
   @IsOptional()

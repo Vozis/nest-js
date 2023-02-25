@@ -18,21 +18,11 @@ export class CreateNewsDto {
   @IsNotEmpty()
   description: string;
 
-  @IsString()
-  @ValidateIf((o) => o.author)
-  author: string;
-
-  @IsNumber()
-  @IsOptional()
-  countViews: number;
 
   @IsString()
   @ValidateIf((o) => o.cover)
   cover: string;
 
-  // @IsDateString()
-  // @IsOptional()
-  // createAt: string;
 
   @IsString()
   @IsNotEmpty()
