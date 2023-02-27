@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UsersEntity } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { hash } from '../utils/crypto';
+import { checkPermission, Modules } from '../utils/check-permission';
 
 @Injectable()
 export class UsersService {
@@ -62,10 +63,17 @@ export class UsersService {
       );
     }
 
+    if (checkPermission(Modules.changeRole, _user.roles)) {
+      _user.roles = updateUserDto.roles || _user.roles;
+    }
+
+
     _user = {
       ..._user,
       ...updateUserDto,
+      password: await hash(updateUserDto.password) || _user.password
     };
+
 
     return this.usersRepository.save(_user);
   }

@@ -1,17 +1,19 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  UseInterceptors,
-  UploadedFiles,
-  ParseIntPipe,
+  Get,
   HttpException,
   HttpStatus,
-  Put, Render, UseGuards,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+  Render,
+  Req,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -94,6 +96,7 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
     @UploadedFiles() avatar: Express.Multer.File,
+    @Req() req
   ) {
     if (avatar[0]?.filename) {
       updateUserDto.avatar = PATH_COMMENTS + avatar[0].filename;
@@ -112,8 +115,21 @@ export class UsersController {
 
   @Get('update/:id')
   @Render('update-user')
-  async updateUserView() {
+  async updateUserView(
+    @Param('id', ParseIntPipe) id: number, @Req() req
+  ) {
+    const _user = await this.usersService.findOne(+id);
+    if (!_user) {
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: 'Такого пользователя не существует',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
     return {
+      _user,
       title: 'Изменение данных пользователя',
     };
   }

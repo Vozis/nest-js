@@ -1,23 +1,19 @@
 <form id='formUsers'>
   <div class='mb-3'>
     <label class='form=label' for='firstNameInput'>Имя</label>
-    <input type='text' class='form-control' name='firstName' id='firstNameInput' required/>
+    <input type='text' class='form-control' name='firstName' id='firstNameInput' value='{{_user.firstName}}'/>
   </div>
   <div class='mb-3'>
     <label class='form=label' for='lastNameInput'>Фамилия</label>
-    <input type='text' class='form-control' name='lastName' id='lastNameInput' required/>
+    <input type='text' class='form-control' name='lastName' id='lastNameInput' value='{{_user.lastName}}'/>
   </div>
   <div class='mb-3'>
     <label class='form=label' for='emailInput'>Email</label>
-    <input type='text' class='form-control' name='email' id='emailInput' required/>
+    <input type='email' class='form-control' name='email' id='emailInput' value='{{_user.email}}'/>
   </div>
   <div class='mb-3'>
     <label class='form=label' for='passwordInput'>Пароль</label>
-    <input type='text' class='form-control' name='password' id='passwordInput' required/>
-  </div>
-  <div class='form-group'>
-    <label class='form=label' for='avatar'>Аватар</label>
-    <input type='file' class='form-control-file' name='avatar' id='avatar' required/>
+    <input type='password' class='form-control' name='password' id='passwordInput' />
   </div>
   <button class='btn btn-primary' type='button' id='submit'>Сохранить</button>
 </form>
@@ -27,15 +23,17 @@
 
   const submit = async () => {
     try {
+      const location = window.location.href.split('/');
+      const id = location[location.length - 1];
       const form = document.getElementById('formUsers')
       const formData = new FormData(form)
       for (const d of formData.entries()) {
         console.log(d);
       }
-      let response = await fetch('http://localhost:3000/users/api', {
-        method: 'POST',
+      let response = await fetch(`http://localhost:3000/users/api/` + id, {
+        method: 'PUT',
         body: formData,
-        headers: { Authorization: 'Bearer ' + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNjc3NDk2MzQ2LCJleHAiOjE2Nzc0OTk5NDZ9.I6VWhmgA4c3sHAk4hrY3iwuZzhtqHUzaKl7_pBqO214"}
+        headers: { Authorization: 'Bearer ' + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNjc3NTI5MTUyLCJleHAiOjE2Nzc1MzI3NTJ9._WGzNR5R1nuQgdNDOe7j8l4SPFOcsocVu8gCK2dBBto"}
       });
       const result = await response.json();
 
