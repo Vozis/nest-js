@@ -1,0 +1,62 @@
+<form id='formUsers'>
+  <div class='mb-3'>
+    <label class='form=label' for='firstNameInput'>Имя</label>
+    <input type='text' class='form-control' name='firstName' id='firstNameInput' required/>
+  </div>
+  <div class='mb-3'>
+    <label class='form=label' for='lastNameInput'>Фамилия</label>
+    <input type='text' class='form-control' name='lastName' id='lastNameInput' required/>
+  </div>
+  <div class='mb-3'>
+    <label class='form=label' for='emailInput'>Email</label>
+    <input type='text' class='form-control' name='email' id='emailInput' required/>
+  </div>
+  <div class='mb-3'>
+    <label class='form=label' for='passwordInput'>Пароль</label>
+    <input type='text' class='form-control' name='password' id='passwordInput' required/>
+  </div>
+  <div class='form-group'>
+    <label class='form=label' for='avatar'>Аватар</label>
+    <input type='file' class='form-control-file' name='avatar' id='avatar' required/>
+  </div>
+  <button class='btn btn-primary' type='button' id='submit'>Сохранить</button>
+</form>
+<br/>
+<a class='btn btn-primary' href='http://localhost:3000/news/all'>К новостям</a>
+<script>
+
+  const submit = async () => {
+    try {
+      const form = document.getElementById('formUsers')
+      const formData = new FormData(form)
+      for (const d of formData.entries()) {
+        console.log(d);
+      }
+      let response = await fetch('http://localhost:3000/users/api', {
+        method: 'POST',
+        body: formData,
+        headers: { Authorization: 'Bearer ' + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNjc3NDk2MzQ2LCJleHAiOjE2Nzc0OTk5NDZ9.I6VWhmgA4c3sHAk4hrY3iwuZzhtqHUzaKl7_pBqO214"}
+      });
+      const result = await response.json();
+
+      document.getElementById('message').textContent = `
+      Изменения сохранены
+      `
+      return result;
+    } catch (e) {
+      document.getElementById('message').textContent = `
+      Ошибка при изменении данных пользователя
+      `
+      console.log(e);
+    }
+
+
+
+  }
+
+  document.getElementById('submit').addEventListener('click', (e) => {
+    e.preventDefault()
+    submit()
+    document.getElementById('formUsers').reset();
+  });
+</script>

@@ -11,7 +11,7 @@ import {
   ParseIntPipe,
   HttpException,
   HttpStatus,
-  Put,
+  Put, Render, UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -21,6 +21,9 @@ import { diskStorage } from 'multer';
 import { imageFileFilter } from '../utils/imageFileFilter';
 import { HelperFileLoader } from '../utils/helperFileLoader';
 import { UsersEntity } from './entities/user.entity';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Roles } from '../auth/role/roles.decorator';
+import { Role } from '../auth/role/role.enum';
 
 const PATH_COMMENTS = '/static/';
 const helperFileLoaderComment = new HelperFileLoader();
@@ -30,6 +33,8 @@ helperFileLoaderComment.path = PATH_COMMENTS;
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @UseGuards(JwtAuthGuard)
+  @Roles(Role.User)
   @Post('api')
   @UseInterceptors(
     FilesInterceptor('avatar', 1, {
@@ -73,6 +78,8 @@ export class UsersController {
     return _user;
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Roles(Role.User)
   @Put('api/:id')
   @UseInterceptors(
     FilesInterceptor('avatar', 1, {
@@ -99,4 +106,16 @@ export class UsersController {
   async remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
   }
+
+
+  // VIEW =================================================================
+
+  @Get('update/:id')
+  @Render('update-user')
+  async updateUserView() {
+    return {
+      title: 'Изменение данных пользователя',
+    };
+  }
+
 }

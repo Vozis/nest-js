@@ -72,7 +72,7 @@ export class NewsController {
 
   @UseGuards(JwtAuthGuard)
   @Roles(Role.Admin, Role.Moderator)
-  @Post('api/')
+  @Post('api')
   @UseInterceptors(
     FilesInterceptor('cover', 1, {
       storage: diskStorage({
@@ -98,6 +98,8 @@ export class NewsController {
     return _news;
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Roles(Role.User)
   @Put('api/:id')
   @UseInterceptors(
     FilesInterceptor('cover', 1, {

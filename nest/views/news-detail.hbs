@@ -7,6 +7,7 @@
     <h5 class="card-title">{{news.title}}</h5>
     <h6 class="card-subtitle mb-2 text-muted">Автор:
       {{news.user.firstName}} {{news.user.lastName}}</h6>
+    <a href="http://localhost:3000/users/update/{{news.user.id}}" a>Редактировать пользователя</a>
     <p class="card-text">{{news.description}}</p>
   </div>
 </div>
@@ -21,6 +22,7 @@
             <div>
               <h6 class="card-subtitle mb-2 text-muted">Автор: {{this.user.firstName}} {{this.user.lastName}}</h6>
               <p class="card-text">Сообщение: {{this.message}}</p>
+              <a href="http://localhost:3000/users/update/{{news.user.id}}"a>Редактировать пользователя</a>
             </div>
           </div>
           <hr/>
