@@ -1,0 +1,39 @@
+<form id='formComments'>
+      <div class='mb-3'>
+        <label class='form=label' for='messageInput'>Сообщение</label>
+        <input type='text' class='form-control' name='message' id='messageInput' required/>
+      </div>
+      <div class='mb-3'>
+        <label class='form=label' for='authorInput'>Автор</label>
+        <input type='text' class='form-control' name='userId' id='authorInput' required/>
+      </div>
+      <button class='btn btn-primary' type='button' id='submitComment'>Создать</button>
+    </form>
+  <script>
+    const createComment = async () => {
+      try {
+        const form = document.getElementById('formComments')
+        let obj = {}
+        const formData = new FormData(form);
+        const plainFormData = Object.fromEntries((formData.entries()))
+
+const json = JSON.stringify(plainFormData)
+        // formData.forEach((value, key) => obj[key] = value)
+        // const json = JSON.stringify(obj)
+        // console.log(json);
+        let response = await fetch(`http://localhost:3000/comments/api/{{news.id}}`, {
+          method: 'POST',
+          body: json,
+        })
+const result = await response.json();
+        console.log(result);
+
+        return result;
+      } catch (e) {
+        console.log(e);
+      }
+    }
+    document.getElementById('submitComment').addEventListener('click', (e) => {
+      createComment()
+    });
+  </script>
