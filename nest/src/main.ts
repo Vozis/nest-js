@@ -6,6 +6,7 @@ import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import * as hbs from 'hbs';
+import * as cookieParser from 'cookie-parser';
 import { engine } from 'express-handlebars';
 
 async function bootstrap() {
@@ -18,7 +19,7 @@ async function bootstrap() {
     }),
   );
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
-
+  app.use(cookieParser());
   app.engine(
     'hbs',
     engine({

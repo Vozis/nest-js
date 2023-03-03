@@ -63,8 +63,10 @@ export class CommentsController {
   @Delete('api/:idNews/:idComment')
   deleteComment(
     @Param('idComment', ParseIntPipe) idComment: number,
+    @Req() req,
   ): Promise<CommentsEntity> {
-    return this.commentsService.remove(idComment);
+    const userId = req.user.userId;
+    return this.commentsService.remove(idComment, userId);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -72,20 +74,4 @@ export class CommentsController {
   deleteAll(@Param('idNews', ParseIntPipe) idNews: number) {
     return this.commentsService.removeAll(idNews);
   }
-
-  /*@Post('api/comments/:idNews/:idComment')
-  replyToComment(
-    @Param() idNews: IdNewsDto,
-    @Param() idComment: IdCommentDto,
-    @Body() dto: CreateCommentDto,
-  ) {
-    const idNewsInt = +idNews.idNews;
-    const idCommentInt = +idComment.idComment;
-
-    if (!avatarReply) {
-    }
-
-    console.log(dto);
-    return this.commentsService.create(idNewsInt, dto, idCommentInt);
-  }*/
 }

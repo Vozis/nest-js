@@ -32,7 +32,7 @@ export class NewsService {
     newsEntity.title = dto.title;
     newsEntity.description = dto.description;
     newsEntity.cover = dto.cover;
-    const _user = await this.usersService.findOne(+dto.userId);
+    const _user = await this.usersService.findById(+dto.userId);
     newsEntity.user = _user;
     const news = await this.newsRepository.create(newsEntity);
     return this.newsRepository.save(news);

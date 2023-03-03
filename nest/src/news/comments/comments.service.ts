@@ -14,6 +14,7 @@ import { UsersService } from '../../users/users.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EventComment } from './event-comment.enum';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { checkPermission, Modules } from '../../utils/check-permission';
 
 @Injectable()
 export class CommentsService {
@@ -44,7 +45,7 @@ export class CommentsService {
           HttpStatus.NOT_FOUND,
         );
       }
-      const _user = await this.usersService.findOne(userId);
+      const _user = await this.usersService.findById(userId);
 
       if (!_user) {
         throw new HttpException(
@@ -117,7 +118,7 @@ export class CommentsService {
     });
   }
 
-  async remove(id: number): Promise<CommentsEntity> {
+  async remove(id: number, userId: number): Promise<CommentsEntity> {
     const _comment = await this.findById(id);
 
     if (!_comment) {
@@ -127,6 +128,21 @@ export class CommentsService {
           error: 'Комментарий не найден',
         },
         HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const _user = await this.usersService.findById(userId);
+
+    if (
+      _user.id !== _comment.user.id &&
+      !checkPermission(Modules.editComment, _user.roles)
+    ) {
+      throw new HttpException(
+        {
+          status: HttpStatus.FORBIDDEN,
+          error: 'Недостаточно прав для удаления',
+        },
+        HttpStatus.FORBIDDEN,
       );
     }
 

@@ -47,7 +47,6 @@ class Comments extends React.Component {
     });
 
     this.socket.on('updateComment', (payload) => {
-      this.socket.broadcast.emit(`Комментарий изменен`);
       const { id, comment } = payload;
       const comments = [...this.state.comments];
       const editCommentIndex = comments.findIndex(
@@ -60,6 +59,11 @@ class Comments extends React.Component {
 
       this.setState({ comments });
     });
+
+    this.socket.on('message', (payload) => {
+      console.log(payload);
+    alert(payload.message);
+    })
   }
 
   getAllComments = async () => {

@@ -63,7 +63,7 @@ export class UsersController {
 
   @Get('api/:id')
   async findOne(@Param('id', ParseIntPipe) id: number): Promise<UsersEntity> {
-    const _user = await this.usersService.findOne(id);
+    const _user = await this.usersService.findById(id);
 
     if (!_user) {
       throw new HttpException(
@@ -113,7 +113,7 @@ export class UsersController {
   @Get('update/:id')
   @Render('update-user')
   async updateUserView(@Param('id', ParseIntPipe) id: number, @Req() req) {
-    const _user = await this.usersService.findOne(+id);
+    const _user = await this.usersService.findById(+id);
     if (!_user) {
       throw new HttpException(
         {

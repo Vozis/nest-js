@@ -36,7 +36,7 @@ export class UsersService {
     return this.usersRepository.find();
   }
 
-  async findOne(id: number) {
+  async findById(id: number) {
     return this.usersRepository.findOneBy({
       id,
     });
@@ -67,13 +67,11 @@ export class UsersService {
       _user.roles = updateUserDto.roles || _user.roles;
     }
 
-
     _user = {
       ..._user,
       ...updateUserDto,
-      password: await hash(updateUserDto.password) || _user.password
+      password: (await hash(updateUserDto.password)) || _user.password,
     };
-
 
     return this.usersRepository.save(_user);
   }
