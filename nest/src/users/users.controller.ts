@@ -33,10 +33,6 @@ helperFileLoaderComment.path = PATH_COMMENTS;
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
-
-  @UseGuards(JwtAuthGuard)
-  @Roles(Role.User)
   @Post('api')
   @UseInterceptors(
     FilesInterceptor('avatar', 1, {
@@ -57,6 +53,8 @@ export class UsersController {
 
     return this.usersService.create(createUserDto);
   }
+
+  constructor(private readonly usersService: UsersService) {}
 
   @Get('api')
   findAll() {
@@ -96,7 +94,7 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
     @UploadedFiles() avatar: Express.Multer.File,
-    @Req() req
+    @Req() req,
   ) {
     if (avatar[0]?.filename) {
       updateUserDto.avatar = PATH_COMMENTS + avatar[0].filename;
@@ -110,14 +108,11 @@ export class UsersController {
     return this.usersService.remove(+id);
   }
 
-
   // VIEW =================================================================
 
   @Get('update/:id')
   @Render('update-user')
-  async updateUserView(
-    @Param('id', ParseIntPipe) id: number, @Req() req
-  ) {
+  async updateUserView(@Param('id', ParseIntPipe) id: number, @Req() req) {
     const _user = await this.usersService.findOne(+id);
     if (!_user) {
       throw new HttpException(
@@ -133,5 +128,4 @@ export class UsersController {
       title: 'Изменение данных пользователя',
     };
   }
-
 }

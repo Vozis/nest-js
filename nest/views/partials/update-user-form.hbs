@@ -1,15 +1,15 @@
 <form id='formUsers'>
   <div class='mb-3'>
     <label class='form=label' for='firstNameInput'>Имя</label>
-    <input type='text' class='form-control' name='firstName' id='firstNameInput' value='{{_user.firstName}}'/>
+    <input type='text' class='form-control' name='firstName' id='firstNameInput' value='{{_user.firstName}}' />
   </div>
   <div class='mb-3'>
     <label class='form=label' for='lastNameInput'>Фамилия</label>
-    <input type='text' class='form-control' name='lastName' id='lastNameInput' value='{{_user.lastName}}'/>
+    <input type='text' class='form-control' name='lastName' id='lastNameInput' value='{{_user.lastName}}' />
   </div>
   <div class='mb-3'>
     <label class='form=label' for='emailInput'>Email</label>
-    <input type='email' class='form-control' name='email' id='emailInput' value='{{_user.email}}'/>
+    <input type='email' class='form-control' name='email' id='emailInput' value='{{_user.email}}' />
   </div>
   <div class='mb-3'>
     <label class='form=label' for='passwordInput'>Пароль</label>
@@ -17,44 +17,43 @@
   </div>
   <button class='btn btn-primary' type='button' id='submit'>Сохранить</button>
 </form>
-<br/>
+<br />
 <a class='btn btn-primary' href='http://localhost:3000/news/all'>К новостям</a>
 <script>
 
   const submit = async () => {
     try {
-      const location = window.location.href.split('/');
+      const location = window.location.href.split("/");
       const id = location[location.length - 1];
-      const form = document.getElementById('formUsers')
-      const formData = new FormData(form)
+      const form = document.getElementById("formUsers");
+      const formData = new FormData(form);
       for (const d of formData.entries()) {
         console.log(d);
       }
       let response = await fetch(`http://localhost:3000/users/api/` + id, {
-        method: 'PUT',
+        method: "PUT",
         body: formData,
-        headers: { Authorization: 'Bearer ' + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNjc3NTI5MTUyLCJleHAiOjE2Nzc1MzI3NTJ9._WGzNR5R1nuQgdNDOe7j8l4SPFOcsocVu8gCK2dBBto"}
+        headers: { Authorization: "Bearer " + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjc3Nzg4Njk0LCJleHAiOjE2Nzc3OTIyOTR9.5EtJHMVqggBNMpjQE3H1Bret4lYnrD-bQ-AKco_y7hM" }
       });
       const result = await response.json();
 
-      document.getElementById('message').textContent = `
+      document.getElementById("message").textContent = `
       Изменения сохранены
-      `
+      `;
       return result;
     } catch (e) {
-      document.getElementById('message').textContent = `
+      document.getElementById("message").textContent = `
       Ошибка при изменении данных пользователя
-      `
+      `;
       console.log(e);
     }
 
 
+  };
 
-  }
-
-  document.getElementById('submit').addEventListener('click', (e) => {
-    e.preventDefault()
-    submit()
-    document.getElementById('formUsers').reset();
+  document.getElementById("submit").addEventListener("click", (e) => {
+    e.preventDefault();
+    submit();
+    document.getElementById("formUsers").reset();
   });
 </script>

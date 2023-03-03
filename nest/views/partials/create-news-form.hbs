@@ -1,57 +1,57 @@
-<form id='formUser'>
+<form id='formNews'>
   <div class='mb-3'>
-    <label class='form=label' for='titleInput'>И</label>
-    <input type='text' class='form-control' name='title' id='titleInput' required/>
+    <label class='form=label' for='titleInput'>Заголовок</label>
+    <input type='text' class='form-control' name='title' id='titleInput' required />
   </div>
   <div class='mb-3'>
     <label class='form=label' for='descriptionInput'>Описание</label>
-    <input type='text' class='form-control' name='description' id='descriptionInput' required/>
+    <input type='text' class='form-control' name='description' id='descriptionInput' required />
   </div>
   <div class='mb-3'>
     <label class='form=label' for='authorInput'>Автор</label>
-    <input type='text' class='form-control' name='userId' id='authorInput' required/>
+    <input type='text' class='form-control' name='userId' id='authorInput' required />
   </div>
   <div class='form-group'>
     <label class='form=label' for='cover'>Обложка</label>
-    <input type='file' class='form-control-file' name='cover' id='cover' required/>
+    <input type='file' class='form-control-file' name='cover' id='cover' required />
   </div>
   <button class='btn btn-primary' type='button' id='submit'>Создать</button>
 </form>
-<br/>
+<br />
 <a class='btn btn-primary' href='http://localhost:3000/news/all'>К новостям</a>
 <script>
 
   const submit = async () => {
     try {
-      const form = document.getElementById('formNews')
-      const formData = new FormData(form)
+      const form = document.getElementById("formNews");
+      const formData = new FormData(form);
       for (const d of formData.entries()) {
         console.log(d);
       }
-      let response = await fetch('http://localhost:3000/news/api', {
-        method: 'POST',
+      let response = await fetch("http://localhost:3000/news/api", {
+        method: "POST",
         body: formData,
+        headers: { Authorization: "Bearer " + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNjc3Nzg2OTYwLCJleHAiOjE2Nzc3OTA1NjB9.lGLNynjoxbbJ6cqXRl8EuS7PZT-1WqJhSY5K1yYkxJ0" }
       });
       const result = await response.json();
 
-      document.getElementById('message').textContent = `
+      document.getElementById("message").textContent = `
       Новость успешно создана
-      `
+      `;
       return result;
     } catch (e) {
-      document.getElementById('message').textContent = `
+      document.getElementById("message").textContent = `
       Ошибка при  создании новости
-      `
+      `;
       console.log(e);
     }
 
 
+  };
 
-  }
-
-  document.getElementById('submit').addEventListener('click', (e) => {
-    e.preventDefault()
-    submit()
-    document.getElementById('formNews').reset();
+  document.getElementById("submit").addEventListener("click", (e) => {
+    e.preventDefault();
+    submit();
+    document.getElementById("formNews").reset();
   });
 </script>

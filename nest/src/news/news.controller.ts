@@ -11,6 +11,7 @@ import {
   Put,
   Query,
   Render,
+  Req,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -71,7 +72,7 @@ export class NewsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Roles(Role.Admin, Role.Moderator)
+  @Roles(Role.Admin, Role.Moderator, Role.User)
   @Post('api')
   @UseInterceptors(
     FilesInterceptor('cover', 1, {
@@ -175,7 +176,7 @@ export class NewsController {
 
   @Get('details/:id')
   @Render('news-detail')
-  async getOneNewsView(@Param('id', ParseIntPipe) id: number) {
+  async getOneNewsView(@Param('id', ParseIntPipe) id: number, @Req() req) {
     const news = await this.newService.findById(id);
 
     if (!news) {
