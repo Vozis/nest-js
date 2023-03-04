@@ -1,4 +1,12 @@
-import { Controller, Post, Request, Res, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Render,
+  Request,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './local-auth.guard';
 import { Response } from 'express';
@@ -17,5 +25,13 @@ export class AuthController {
     response.cookie('userId', id);
     response.cookie('role', role);
     return access_token;
+  }
+
+  // VIEW =================================================================
+
+  @Get('login')
+  @Render('auth/login')
+  async renderLogin() {
+    return { layout: 'auth', title: 'Авторизация' };
   }
 }

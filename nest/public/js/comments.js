@@ -62,8 +62,8 @@ class Comments extends React.Component {
 
     this.socket.on('message', (payload) => {
       console.log(payload);
-    alert(payload.message);
-    })
+      alert(payload.message);
+    });
   }
 
   getAllComments = async () => {
@@ -102,6 +102,9 @@ class Comments extends React.Component {
       `http://localhost:3000/comments/api/${this.idNews}/${commentId}`,
       {
         method: 'DELETE',
+        headers: {
+          authorization: Cookies.get('authorization'),
+        },
       },
     );
 
@@ -140,6 +143,8 @@ class Comments extends React.Component {
   };
 
   render() {
+    const userId = +Cookies.get('userId');
+    const role = Cookies.get('role');
     return (
       <div>
         {this.state.comments.map((comment, index) => {
@@ -179,12 +184,15 @@ class Comments extends React.Component {
                     Редактировать
                   </button>
                 )}
-                <button
-                  onClick={() => this.deleteComment(comment.id)}
-                  className="btn btn-outline-info btn-sm px-4 me-sm-3 fw-bold"
-                >
-                  Удалить
-                </button>
+
+                {comment.user.id === userId || role === 'admin' ? (
+                  <button
+                    onClick={() => this.deleteComment(comment.id)}
+                    className="btn btn-outline-info btn-sm px-4 me-sm-3 fw-bold"
+                  >
+                    Удалить
+                  </button>
+                ) : null}
               </div>
             </div>
           );

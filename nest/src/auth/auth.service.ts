@@ -16,6 +16,7 @@ export class AuthService {
 
     if (user && passwordEquals) {
       const { password, ...result } = user;
+
       return result;
     }
 

@@ -131,20 +131,20 @@ export class CommentsService {
       );
     }
 
-    const _user = await this.usersService.findById(userId);
-
-    if (
-      _user.id !== _comment.user.id &&
-      !checkPermission(Modules.editComment, _user.roles)
-    ) {
-      throw new HttpException(
-        {
-          status: HttpStatus.FORBIDDEN,
-          error: 'Недостаточно прав для удаления',
-        },
-        HttpStatus.FORBIDDEN,
-      );
-    }
+    // const _user = await this.usersService.findById(userId);
+    //
+    // if (
+    //   _user.id !== _comment.user.id &&
+    //   !checkPermission(Modules.editComment, _user.roles)
+    // ) {
+    //   throw new HttpException(
+    //     {
+    //       status: HttpStatus.FORBIDDEN,
+    //       error: 'Недостаточно прав для удаления',
+    //     },
+    //     HttpStatus.FORBIDDEN,
+    //   );
+    // }
 
     this.eventEmitter.emit(EventComment.REMOVE, {
       commentId: _comment.id,
