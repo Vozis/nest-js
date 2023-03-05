@@ -32,11 +32,29 @@ class Comments extends React.Component {
   componentDidMount() {
     // Указываем комнату
     this.getAllComments();
-    // this.socket.emit('create', this.idNews.toString());
     // Подписываемся на событие появления нового комментария
     this.socket.on('newComment', (message) => {
       const comments = this.state.comments;
       comments.push(message);
+      this.setState(comments);
+    });
+
+    this.socket.on('replyToComment', (message) => {
+      const comments = this.state.comments;
+
+      const parent = comments.find(
+        (comment) => comment.id === message.parent.id,
+      );
+      parent.children.push(message);
+
+      const index = comments.findIndex(
+        (comment) => comment.id === message.parent.id,
+      );
+
+      if (index !== -1) {
+        comments[index] = parent;
+      }
+
       this.setState(comments);
     });
 
@@ -61,7 +79,6 @@ class Comments extends React.Component {
     });
 
     this.socket.on('message', (payload) => {
-      console.log(payload);
       alert(payload.message);
     });
   }
@@ -85,19 +102,31 @@ class Comments extends React.Component {
   };
 
   sendMessage = () => {
-    console.log(this.idNews, this.state.message);
+    // console.log(this.idNews, this.state.message);
     // Отправляем на сервер событие добавления комментария
     this.socket.emit('addComment', {
       idNews: this.idNews,
-      message: this.state.message,
+      comment: {
+        message: this.state.message,
+      },
+    });
+
+    this.setState({ message: '' });
+  };
+
+  replyToComment = (commentId) => {
+    this.socket.emit('addComment', {
+      idNews: this.idNews,
+      comment: {
+        message: this.state.message,
+        commentId,
+      },
     });
 
     this.setState({ message: '' });
   };
 
   deleteComment = async (commentId) => {
-    // const commentId = +event.target.closest('.card').dataset.id;
-
     const response = await fetch(
       `http://localhost:3000/comments/api/${this.idNews}/${commentId}`,
       {
@@ -119,9 +148,6 @@ class Comments extends React.Component {
     };
 
     const json = JSON.stringify(obj);
-
-    console.log(json);
-
     const response = await fetch(
       `http://localhost:3000/comments/api/${commentId}`,
       {
@@ -157,6 +183,44 @@ class Comments extends React.Component {
               <div className="card-body">
                 <strong>{comment.user.firstName}</strong>
                 <div>{comment.message}</div>
+                <h6>Ответы на комментарий:</h6>
+                <div>
+                  <h6 className="lh-1 mt-3">Ответить:</h6>
+                  <div className="form-floating mb-1">
+                    <textarea
+                      className="form-control"
+                      placeholder="Leave a comment here"
+                      value={this.state.message}
+                      name="message"
+                      onChange={this.onChange}
+                    ></textarea>
+                    <label htmlFor="floatingmessagearea2">Сообщение</label>
+                  </div>
+                  <button
+                    onClick={() => this.replyToComment(comment.id)}
+                    className="btn btn-outline-info btn-sm px-4 me-sm-3 fw-bold"
+                  >
+                    Send
+                  </button>
+                </div>
+                <div>
+                  {comment.children
+                    ? comment.children.map((com, index) => {
+                        return (
+                          <div
+                            key={com + index}
+                            className="card mb-1"
+                            data-id={com.id}
+                          >
+                            <div className="card-body">
+                              <strong>{com.user.firstName}</strong>
+                              <div>{com.message}</div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    : null}
+                </div>
                 {this.state.isUpdated && (
                   <div>
                     <textarea

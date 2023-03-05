@@ -16,6 +16,7 @@ import { CommentsService } from './comments.service';
 import { CommentsEntity } from './entities/comments.entity';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { CreateCommentDto } from './dto/create-comment.dto';
 
 @Controller('comments')
 export class CommentsController {
@@ -44,11 +45,11 @@ export class CommentsController {
   @Post('api/:idNews')
   create(
     @Param('idNews', ParseIntPipe) idNews: number,
-    @Body() message: string,
+    @Body() comment: CreateCommentDto,
     @Req() req,
   ) {
     const jwtUserId = req.user.userId;
-    return this.commentsService.create(idNews, message, jwtUserId);
+    return this.commentsService.create(idNews, comment, jwtUserId);
   }
 
   @Put('api/:idComment')

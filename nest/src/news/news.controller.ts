@@ -30,11 +30,19 @@ import { isEmpty } from 'lodash';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/role/roles.decorator';
 import { Role } from '../auth/role/role.enum';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 const PATH_NEWS = '/static/';
 const helperFileLoaderNews = new HelperFileLoader();
 helperFileLoaderNews.path = PATH_NEWS;
 
+@ApiBearerAuth()
+@ApiTags('news')
 @Controller('news')
 export class NewsController {
   constructor(
@@ -71,6 +79,16 @@ export class NewsController {
     };
   }
 
+  @ApiOperation({ summary: 'Create news' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'News created',
+    type: NewsEntity,
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'forbidden',
+  })
   @UseGuards(JwtAuthGuard)
   @Roles(Role.Admin, Role.Moderator, Role.User)
   @Post('api')

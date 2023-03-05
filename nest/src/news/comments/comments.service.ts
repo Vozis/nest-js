@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CommentsEntity } from './entities/comments.entity';
-import { Repository } from 'typeorm';
+import { Repository, TreeRepository } from 'typeorm';
 
 import { NewsService } from '../news.service';
 import { UsersService } from '../../users/users.service';
@@ -15,58 +15,60 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EventComment } from './event-comment.enum';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { checkPermission, Modules } from '../../utils/check-permission';
+import { CreateCommentDto } from './dto/create-comment.dto';
 
 @Injectable()
 export class CommentsService {
   constructor(
     @InjectRepository(CommentsEntity)
-    private readonly commentsRepository: Repository<CommentsEntity>,
+    private readonly commentsRepository: TreeRepository<CommentsEntity>,
     @Inject(forwardRef(() => NewsService))
     private readonly newsService: NewsService,
     private readonly usersService: UsersService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  async create(
-    idNews: number,
-    comment: string,
-    userId: number,
-    idComment?: number,
-  ) {
-    if (!idComment) {
-      const _news = await this.newsService.findById(idNews);
+  async create(idNews: number, comment: CreateCommentDto, userId: number) {
+    const _news = await this.newsService.findById(idNews);
 
-      if (!_news) {
-        throw new HttpException(
-          {
-            status: HttpStatus.NOT_FOUND,
-            error: 'Новость не найдена',
-          },
-          HttpStatus.NOT_FOUND,
-        );
-      }
-      const _user = await this.usersService.findById(userId);
+    if (!_news) {
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: 'Новость не найдена',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    const _user = await this.usersService.findById(userId);
 
-      if (!_user) {
-        throw new HttpException(
-          {
-            status: HttpStatus.NOT_FOUND,
-            error: 'Пользователь не найден',
-          },
-          HttpStatus.NOT_FOUND,
-        );
-      }
+    if (!_user) {
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: 'Пользователь не найден',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    const createdComment = new CommentsEntity();
+    createdComment.message = comment.message;
+    createdComment.user = _user;
+    createdComment.news = _news;
 
-      const createdComment = new CommentsEntity();
-      createdComment.message = comment;
-      createdComment.user = _user;
-      createdComment.news = _news;
+    if (!comment.commentId) {
       const newComment = await this.commentsRepository.create(createdComment);
 
       return this.commentsRepository.save(newComment);
     }
 
-    // return this.findCommentAndReply(this.comments, idComment, comment);
+    const parent = await this.findById(comment.commentId);
+    const child = await this.commentsRepository.create(createdComment);
+    child.parent = parent;
+
+    // const a = await this.commentsRepository.findTrees();
+    // console.log(a);
+    return this.commentsRepository.save(child);
   }
 
   async updateComment(
@@ -98,7 +100,7 @@ export class CommentsService {
   }
 
   async findAll(idNews: number): Promise<CommentsEntity[]> {
-    return this.commentsRepository.find({
+    const comments = await this.commentsRepository.find({
       where: {
         news: {
           id: idNews,
@@ -106,6 +108,12 @@ export class CommentsService {
       },
       relations: ['user'],
     });
+
+    const parents = await this.commentsRepository.findTrees({
+      relations: ['user', 'news'],
+    });
+
+    return parents;
   }
 
   async findById(id: number): Promise<CommentsEntity> {

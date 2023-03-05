@@ -25,6 +25,8 @@ async function bootstrap() {
   );
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
   app.use(cookieParser());
+
+  // hbs =================================================================
   app.engine(
     'hbs',
     engine({
@@ -35,6 +37,8 @@ async function bootstrap() {
   );
   hbs.registerPartials(__dirname + '/views/partials');
   app.setViewEngine('hbs');
+
+  // OpenApi =================================================================
 
   const config = new DocumentBuilder()
     .setTitle('Урок по nest js')

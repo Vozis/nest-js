@@ -12,9 +12,10 @@ import { CommentsService } from './comments.service';
 import { WsJwtGuard } from '../../auth/ws-jwt.guard';
 import { OnEvent } from '@nestjs/event-emitter';
 import { EventComment } from './event-comment.enum';
+import { CreateCommentDto } from './dto/create-comment.dto';
 
 export type Comment = {
-  message: string;
+  comment: CreateCommentDto;
   idNews: number;
 };
 
@@ -29,16 +30,16 @@ export class SocketCommentsGateway
 
   @UseGuards(WsJwtGuard)
   @SubscribeMessage('addComment')
-  async handleMessage(client: Socket, comment: Comment) {
-    const { idNews, message } = comment;
+  async handleMessage(client: Socket, createdComment: Comment) {
+    const { idNews, comment } = createdComment;
     const userId: number = client.data.user.id;
     const _comment = await this.commentsService.create(
       +idNews,
-      message,
+      comment,
       userId,
     );
 
-    this.server.to(idNews.toString()).emit('newComment', _comment);
+    this.server.to(idNews.toString()).emit('replyToComment', _comment);
   }
 
   afterInit(server: Server) {
