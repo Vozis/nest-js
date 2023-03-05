@@ -26,11 +26,13 @@ import { UsersEntity } from './entities/user.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/role/roles.decorator';
 import { Role } from '../auth/role/role.enum';
+import { ApiTags } from '@nestjs/swagger';
 
 const PATH_COMMENTS = '/static/';
 const helperFileLoaderComment = new HelperFileLoader();
 helperFileLoaderComment.path = PATH_COMMENTS;
 
+@ApiTags('users')
 @Controller('users')
 export class UsersController {
   @Post('api')

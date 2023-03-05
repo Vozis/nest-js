@@ -39,6 +39,10 @@ export class SocketCommentsGateway
       userId,
     );
 
+    if (!comment.commentId) {
+      this.server.to(idNews.toString()).emit('newComment', _comment);
+    }
+
     this.server.to(idNews.toString()).emit('replyToComment', _comment);
   }
 

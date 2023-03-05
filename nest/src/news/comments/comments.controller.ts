@@ -17,7 +17,10 @@ import { CommentsEntity } from './entities/comments.entity';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiBearerAuth()
+@ApiTags('comments')
 @Controller('comments')
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}

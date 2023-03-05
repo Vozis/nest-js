@@ -10,7 +10,10 @@ import {
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './local-auth.guard';
 import { Response } from 'express';
+import { ApiBasicAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiBasicAuth()
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

@@ -183,7 +183,6 @@ class Comments extends React.Component {
               <div className="card-body">
                 <strong>{comment.user.firstName}</strong>
                 <div>{comment.message}</div>
-                <h6>Ответы на комментарий:</h6>
                 <div>
                   <h6 className="lh-1 mt-3">Ответить:</h6>
                   <div className="form-floating mb-1">
@@ -203,23 +202,26 @@ class Comments extends React.Component {
                     Send
                   </button>
                 </div>
+                <h6>Ответы на комментарий:</h6>
                 <div>
-                  {comment.children
-                    ? comment.children.map((com, index) => {
-                        return (
-                          <div
-                            key={com + index}
-                            className="card mb-1"
-                            data-id={com.id}
-                          >
-                            <div className="card-body">
-                              <strong>{com.user.firstName}</strong>
-                              <div>{com.message}</div>
-                            </div>
+                  {comment.children && comment.children.length > 0 ? (
+                    comment.children.map((com, index) => {
+                      return (
+                        <div
+                          key={com + index}
+                          className="card mb-1"
+                          data-id={com.id}
+                        >
+                          <div className="card-body">
+                            <strong>{com.user.firstName}</strong>
+                            <div>{com.message}</div>
                           </div>
-                        );
-                      })
-                    : null}
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <p>Ответов пока нет</p>
+                  )}
                 </div>
                 {this.state.isUpdated && (
                   <div>

@@ -53,6 +53,12 @@ export class NewsController {
 
   // API =================================================
 
+  @ApiOperation({ summary: 'Get all news' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'News all',
+    type: [NewsEntity],
+  })
   @Get('api/all')
   async getAll(userId): Promise<NewsEntity[]> {
     return this.newService.getAll(userId);

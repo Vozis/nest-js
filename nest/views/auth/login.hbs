@@ -28,10 +28,10 @@
         method: "POST",
         body: formData,
       })
-      // const result = await response.json();
+      const result = await response.json();
 
 
-      return response;
+      return result;
     } catch (e) {
       console.log(e);
     }
