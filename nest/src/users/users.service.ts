@@ -76,7 +76,21 @@ export class UsersService {
     return this.usersRepository.save(_user);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    const _user = await this.usersRepository.findOneBy({
+      id,
+    });
+
+    if (!_user) {
+      throw new HttpException(
+        {
+          status: HttpStatus.NOT_FOUND,
+          error: 'Такого пользователя не существует',
+        },
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return this.usersRepository.remove(_user);
   }
 }

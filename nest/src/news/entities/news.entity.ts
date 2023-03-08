@@ -34,10 +34,14 @@ export class NewsEntity {
   })
   cover: string;
 
-  @ManyToOne(() => UsersEntity, (user) => user.news)
+  @ManyToOne(() => UsersEntity, (user) => user.news, {
+    onDelete: 'CASCADE',
+  })
   user: UsersEntity;
 
-  @OneToMany(() => CommentsEntity, (comments) => comments.news)
+  @OneToMany(() => CommentsEntity, (comments) => comments.news, {
+    onDelete: 'CASCADE',
+  })
   comments: CommentsEntity[];
 
   @CreateDateColumn({

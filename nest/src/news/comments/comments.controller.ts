@@ -17,7 +17,13 @@ import { CommentsEntity } from './entities/comments.entity';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { NewsEntity } from '../entities/news.entity';
 
 @ApiBearerAuth()
 @ApiTags('comments')
@@ -25,6 +31,16 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
+  @ApiOperation({ summary: 'get comments for news' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'comment for news got',
+    type: NewsEntity,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'news not found',
+  })
   @Get('api/details/:idNews')
   async findAllCommentsForNews(
     @Param('idNews', ParseIntPipe) idNews: number,
@@ -44,6 +60,16 @@ export class CommentsController {
     return comments;
   }
 
+  @ApiOperation({ summary: 'Create comment' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'comment created',
+    type: NewsEntity,
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'forbidden',
+  })
   @UseGuards(JwtAuthGuard)
   @Post('api/:idNews')
   create(
@@ -55,6 +81,17 @@ export class CommentsController {
     return this.commentsService.create(idNews, comment, jwtUserId);
   }
 
+  @ApiOperation({ summary: 'update comments' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'comment created',
+    type: NewsEntity,
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'forbidden',
+  })
+  @UseGuards(JwtAuthGuard)
   @Put('api/:idComment')
   async UpdateComment(
     @Param('idComment', ParseIntPipe) idComment: number,
@@ -63,6 +100,16 @@ export class CommentsController {
     return this.commentsService.updateComment(idComment, dto);
   }
 
+  @ApiOperation({ summary: 'delete comments' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'comment deleted',
+    type: NewsEntity,
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'forbidden',
+  })
   @UseGuards(JwtAuthGuard)
   @Delete('api/:idNews/:idComment')
   deleteComment(

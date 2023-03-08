@@ -92,10 +92,10 @@ export class NewsService {
       return 'Новость не найдена';
     }
 
-    const comments = await this.commentsService.findAll(id);
-    if (comments.length != 0) {
-      await this.commentsService.removeAll(id);
-    }
+    // const comments = await this.commentsService.findAll(id);
+    // if (comments.length != 0) {
+    //   await this.commentsService.removeAll(id);
+    // }
 
     return this.newsRepository.remove(removedNews);
   }

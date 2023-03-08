@@ -26,7 +26,7 @@ import { UsersEntity } from './entities/user.entity';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/role/roles.decorator';
 import { Role } from '../auth/role/role.enum';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 const PATH_COMMENTS = '/static/';
 const helperFileLoaderComment = new HelperFileLoader();
@@ -35,6 +35,12 @@ helperFileLoaderComment.path = PATH_COMMENTS;
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
+  @ApiOperation({ summary: 'create user' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'user created',
+    type: UsersEntity,
+  })
   @Post('api')
   @UseInterceptors(
     FilesInterceptor('avatar', 1, {
@@ -58,11 +64,23 @@ export class UsersController {
 
   constructor(private readonly usersService: UsersService) {}
 
+  @ApiOperation({ summary: 'find all users' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'get all users',
+    type: [UsersEntity],
+  })
   @Get('api')
   findAll() {
     return this.usersService.findAll();
   }
 
+  @ApiOperation({ summary: 'find one user' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'get one user',
+    type: UsersEntity,
+  })
   @Get('api/:id')
   async findOne(@Param('id', ParseIntPipe) id: number): Promise<UsersEntity> {
     const _user = await this.usersService.findById(id);
@@ -80,6 +98,16 @@ export class UsersController {
     return _user;
   }
 
+  @ApiOperation({ summary: 'update news' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'user updated',
+    type: UsersEntity,
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'forbidden',
+  })
   @UseGuards(JwtAuthGuard)
   @Roles(Role.User)
   @Put('api/:id')
@@ -105,7 +133,17 @@ export class UsersController {
     return this.usersService.update(id, updateUserDto);
   }
 
-  @Delete(':id')
+  @ApiOperation({ summary: 'delete user' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'user deleted',
+    type: UsersEntity,
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'forbidden',
+  })
+  @Delete('api/:id')
   async remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
   }

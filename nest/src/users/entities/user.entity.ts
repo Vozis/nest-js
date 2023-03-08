@@ -38,7 +38,9 @@ export class UsersEntity {
   @OneToMany(() => NewsEntity, (news) => news.user)
   news: NewsEntity[];
 
-  @OneToMany(() => CommentsEntity, (comments) => comments.user)
+  @OneToMany(() => CommentsEntity, (comments) => comments.user, {
+    onDelete: 'CASCADE',
+  })
   comments: CommentsEntity[];
 
   @CreateDateColumn({

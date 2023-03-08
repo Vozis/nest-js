@@ -139,20 +139,20 @@ export class CommentsService {
       );
     }
 
-    // const _user = await this.usersService.findById(userId);
-    //
-    // if (
-    //   _user.id !== _comment.user.id &&
-    //   !checkPermission(Modules.editComment, _user.roles)
-    // ) {
-    //   throw new HttpException(
-    //     {
-    //       status: HttpStatus.FORBIDDEN,
-    //       error: 'Недостаточно прав для удаления',
-    //     },
-    //     HttpStatus.FORBIDDEN,
-    //   );
-    // }
+    const _user = await this.usersService.findById(userId);
+
+    if (
+      _user.id !== _comment.user.id &&
+      !checkPermission(Modules.editComment, _user.roles)
+    ) {
+      throw new HttpException(
+        {
+          status: HttpStatus.FORBIDDEN,
+          error: 'Недостаточно прав для удаления',
+        },
+        HttpStatus.FORBIDDEN,
+      );
+    }
 
     this.eventEmitter.emit(EventComment.REMOVE, {
       commentId: _comment.id,
@@ -166,50 +166,4 @@ export class CommentsService {
     const removedComments = await this.findAll(idNews);
     return this.commentsRepository.remove(removedComments);
   }
-
-  // private findCommentAndReply(
-  //   comments,
-  //   idComment: number,
-  //   comment: CreateCommentDto,
-  // ) {
-  //   for (const property in comments) {
-  //     if (comments.hasOwnProperty(property)) {
-  //       if (typeof comments[property] === 'object') {
-  //         this.findCommentAndReply(comments[property], idComment, comment);
-  //       }
-  //       if (comments[property] == idComment) {
-  //         if (!comments['reply']) {
-  //           comments['reply'] = [];
-  //         }
-  //         if (!comment.avatar) {
-  //           comment.avatar =
-  //             'https://media.istockphoto.com/id/476085198/photo/businessman-silhouette-as-avatar-or-default-profile-picture.jpg?s=612x612&w=0&k=20&c=GVYAgYvyLb082gop8rg0XC_wNsu0qupfSLtO7q9wu38=';
-  //         }
-  //         comments['reply'].push({
-  //           id: getRandomInt(),
-  //           ...comment,
-  //         });
-  //         return comment;
-  //       }
-  //     }
-  //   }
-  // }
-
-  // private findAndEdit(comments, idComment, comment) {
-  //   for (const property in comments) {
-  //     if (comments.hasOwnProperty(property)) {
-  //       if (typeof comments[property] == 'object') {
-  //         this.findAndEdit(comments[property], idComment, comment);
-  //       }
-  //       if (comments[property] == idComment) {
-  //         comments = {
-  //           ...comments,
-  //           ...comment,
-  //         };
-  //         return comments;
-  //       }
-  //       return comments;
-  //     }
-  //   }
-  // }
 }

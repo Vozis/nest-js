@@ -21,16 +21,22 @@ export class CommentsEntity {
   @Column('text')
   message: string;
 
-  @ManyToOne(() => UsersEntity, (user) => user.comments)
+  @ManyToOne(() => UsersEntity, (user) => user.comments, {
+    onDelete: 'CASCADE',
+  })
   user: UsersEntity;
 
-  @ManyToOne(() => NewsEntity, (news) => news.comments)
+  @ManyToOne(() => NewsEntity, (news) => news.comments, {
+    onDelete: 'CASCADE',
+  })
   news: NewsEntity;
 
   @TreeChildren()
   children: CommentsEntity[];
 
-  @TreeParent()
+  @TreeParent({
+    onDelete: 'CASCADE',
+  })
   parent: CommentsEntity;
 
   @CreateDateColumn({

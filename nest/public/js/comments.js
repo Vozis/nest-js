@@ -132,7 +132,7 @@ class Comments extends React.Component {
       {
         method: 'DELETE',
         headers: {
-          authorization: Cookies.get('authorization'),
+          authorization: Cookies.get('jwt'),
         },
       },
     );
