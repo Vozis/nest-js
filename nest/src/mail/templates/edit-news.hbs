@@ -1,0 +1,66 @@
+{{#if isChanged}}
+  <h1>Новость отредактирована</h1>
+  <tr>
+    <td>Название:</td>
+  {{#if editFields.title}}
+    <td>
+      <p>Предыдущие название: {{editFields.title.previousTitle}}</p>
+      <p>Новое название: {{editFields.title.newTitle}}</p>
+    </td>
+  {{else}}
+      <td>
+        <p>Название не изменилось</p>
+      </td>
+  {{/if}}
+  </tr>
+  <tr>
+    <td>Описание:</td>
+    {{#if editFields.description}}
+      <td>
+        <p>Предыдущие описание: {{editFields.description.previousDescription}}</p>
+        <p>Новое описание: {{editFields.description.newDescription}}</p>
+      </td>
+    {{else}}
+      <td>
+        <p>Описание не изменилось</p>
+      </td>
+    {{/if}}
+  </tr>
+  <tr>
+    <td>Автор:</td>
+    {{#if editFields.author}}
+      <td>
+        <p>Предыдущий автор: {{editFields.author.previousAuthor}}</p>
+        <p>Новый автор: {{editFields.author.newAuthor}}</p>
+      </td>
+    {{else}}
+      <td>
+        <p>Автор не изменился</p>
+      </td>
+    {{/if}}
+  </tr>
+  <tr>
+    <td>Обложка:</td>
+    {{#if editFields.cover}}
+      <td>
+        <p>Предыдущая обложка: {{editFields.cover.previousCover}}</p>
+        <p>Новая обложка: http://localhost:3000{{editFields.cover.newCover}}</p>
+      </td>
+    {{else}}
+      <td>
+        <p>Обложка не изменилась</p>
+      </td>
+    {{/if}}
+  </tr>
+  <tr>
+  <td>Ссылка на новость</td>
+  <td>
+    <a href='http://localhost:3000/view/news/{{idNews}}/detail'>
+      http://localhost:3000/view/news/{{idNews}}/detail
+    </a>
+  </td>
+</tr>
+{{else}}
+  <h2>Новость не была отредактирована</h2>
+
+{{/if}}

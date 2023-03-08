@@ -1,0 +1,45 @@
+<main class="form-signin">
+  <div>
+    <h1 class="h3 mb-3 fw-normal">Авторизация</h1>
+    <form id='formLogin'>
+      <div class="form-floating">
+        <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" value="user@test.ru">
+        <label for="email">Email</label>
+      </div>
+      <div class="form-floating">
+        <input type="password" class="form-control" id="password" name="password" placeholder="Password" value="root">
+        <label for="password">Пароль</label>
+      </div>
+      <button class="w-100 btn btn-lg btn-primary" id='submit'>Войти</button>
+    </form>
+  </div>
+</main>
+
+<script>
+
+  const submit = async () => {
+    try {
+      const form = document.getElementById("formLogin");
+      const formData = new FormData(form);
+      for (const d of formData.entries()) {
+        console.log(d);
+      }
+      let response = await fetch(`http://localhost:3000/auth/login`, {
+        method: "POST",
+        body: formData,
+      })
+      const result = await response.json();
+
+
+      return result;
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  document.getElementById("submit").addEventListener("click", (e) => {
+    e.preventDefault();
+    submit();
+    document.getElementById("formLogin").reset();
+  });
+</script>

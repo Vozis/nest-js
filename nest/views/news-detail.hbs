@@ -1,0 +1,24 @@
+{{#if news}}
+  <a class='btn btn-primary' style='margin: 20px 0 20px 0' href='http://localhost:3000/news/all'>К списку новостей</a>
+  <div class="card news" data-id='{{news.id}}'>
+    <img src='{{news.cover}}'
+         class="card-img-top" style="height: 200px; object-fit: cover;" alt='' />
+    <div class="card-body">
+      <h5 class="card-title">{{news.title}}</h5>
+      <h6 class="card-subtitle mb-2 text-muted">Автор:
+        {{news.user.firstName}} {{news.user.lastName}}</h6>
+      <a href="http://localhost:3000/users/update/{{news.user.id}}" a>Редактировать пользователя</a>
+      <p class="card-text">{{news.description}}</p>
+    </div>
+  </div>
+{{else}}
+  <h3>Новость не найдена</h3>
+  <a class='btn btn-primary' style='margin: 20px 0 20px 0' href='http://localhost:3000/view/news/'>К списку новостей</a>
+{{/if}}
+
+<h2 class="fw-bold lh-1 mb-3">Список комментариев:</h2>
+<div id="app"></div>
+<script src="/js/comments.js" type="text/babel"></script>
+
+
+
